@@ -1,1 +1,37 @@
+# trivy/trivy.yaml
+version: "2"
+vulnerability:
+  # Fail CI if CRITICAL or HIGH vulnerabilities are found
+  severity:
+    - CRITICAL
+    - HIGH
+  # Ignore unfixed vulnerabilities if needed
+  ignore-unfixed: true
+  # Path to ignore file (if you want to whitelist some CVEs)
+  ignorefile: trivy/.trivyignore
 
+scan:
+  scanners:
+    - vuln        # vulnerabilities
+    - config      # misconfiguration in Dockerfiles, K8s manifests, etc.
+  skip-dirs:
+    - tests       # skip scanning test code
+    - docs        # skip scanning documentation
+  skip-files:
+    - stack/wazuh-stack.yml   # ignore stack definition if needed
+
+misconfiguration:
+  severity:
+    - CRITICAL
+    - HIGH
+    - MEDIUM
+
+# Output settings
+output:
+  format: table   # human-readable (can also be json, sarif, etc.)
+  severity: CRITICAL,HIGH
+  exit-code: 1    # fail pipeline if matches severity threshold
+
+# Cache
+cache:
+  dir: ~/.cache/trivy
