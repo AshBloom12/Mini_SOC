@@ -1,1 +1,21 @@
+---
+- name: Deploy Wazuh stack on Swarm manager
+  block:
+    - name: Deploy or update Wazuh stack
+      docker_stack:
+        name: "{{ swarm_stack_name }}"
+        state: present
+        compose:
+          - "{{ playbook_dir }}/roles/deploy-stack/templates/docker-compose.yml.j2"
+        prune: yes
+      when: hostvars[inventory_hostname].role == "dashboard"
+      register: deploy_result
 
+  rescue:
+    - name: Rollback and fail if stack deployment failed
+      block:
+        - docker_stack:
+            name: "{{ swarm_stack_name }}"
+            state: absent
+        - fail:
+            msg: "Wazuh stack deployment failed on {{ inventory_hostname }}. Check Swarm logs."
