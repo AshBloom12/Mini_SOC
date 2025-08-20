@@ -1,1 +1,14 @@
+# Swarm stack configuration
+swarm_stack_name: wazuh-stack
+docker_networks:
+  - name: wazuh-net
+    driver: overlay
 
+# Wazuh images (dynamic references from environment variables)
+wazuh_image_manager: "${WAZUH_MANAGER_IMAGE}"
+wazuh_image_indexer: "${WAZUH_INDEXER_IMAGE}"
+wazuh_image_dashboard: "${WAZUH_DASHBOARD_IMAGE}"
+
+# Dashboard configuration
+dashboard_port: 443
+dashboard_https: true
