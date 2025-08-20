@@ -1,1 +1,11 @@
-
+---
+# Create overlay networks for Wazuh stack
+- name: Create Wazuh overlay networks
+  docker_network:
+    name: "{{ item.name }}"
+    driver: "{{ item.driver | default('overlay') }}"
+    scope: swarm
+    # attachable lets standalone containers (not only swarm services) attach if needed (useful for debugging)
+    attachable: true
+  with_items: "{{ docker_networks }}"
+  when: hostvars[inventory_hostname].role == "dashboard"
