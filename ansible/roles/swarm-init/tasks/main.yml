@@ -1,1 +1,22 @@
+---
+# Initialize Docker Swarm on the dashboard node
+- name: Initialize Docker Swarm on dashboard node
+  docker_swarm:
+    state: present
+    advertise_addr: "{{ ansible_host }}"
+  when: hostvars[inventory_hostname].role == "dashboard"
+  register: swarm_init
 
+# Save manager join token (for other manager/indexer nodes)
+- name: Set fact for manager join token
+  set_fact:
+    manager_join_token: "{{ swarm_init.swarm_facts.JoinTokens.Manager }}"
+  when: hostvars[inventory_hostname].role == "dashboard"
+
+# Join manager+indexer nodes to the swarm
+- name: Join manager+indexer nodes to swarm
+  docker_swarm:
+    state: join
+    join_token: "{{ hostvars[groups['nodes'][0]].manager_join_token }}"
+    remote_addrs: ["{{ hostvars[groups['nodes'][0]].ansible_host }}"]
+  when: hostvars[inventory_hostname].role == "manager"
