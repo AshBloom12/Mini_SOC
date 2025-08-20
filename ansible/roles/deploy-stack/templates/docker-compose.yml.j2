@@ -1,1 +1,59 @@
+version: "3.9"
 
+networks:
+  wazuh-net:
+    external: true
+
+services:
+  wazuh-manager:
+    image: "{{ wazuh_image_manager }}"
+    networks:
+      - wazuh-net
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.role == manager
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+
+  wazuh-indexer:
+    image: "{{ wazuh_image_indexer }}"
+    networks:
+      - wazuh-net
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.role == manager
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+
+  wazuh-dashboard:
+    image: "{{ wazuh_image_dashboard }}"
+    ports:
+      - "{{ dashboard_port }}:{{ dashboard_port }}"
+    networks:
+      - wazuh-net
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.role == dashboard
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      rollback_config:
+        parallelism: 1
+        delay: 10s
