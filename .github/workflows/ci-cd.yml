@@ -125,3 +125,39 @@ jobs:
           md5_variable_name: "SPIN_MD5_HASH_TRAEFIK_YML"
           env_file_base64: "${{ secrets.ENV_FILE_BASE64 }}"
 
+#-------------SEE THIS---------------------------------------------------
+    env:
+      WAZUH_MANAGER_IMAGE: ghcr.io/${{ github.repository }}/wazuh-manager:latest
+      WAZUH_INDEXER_IMAGE: ghcr.io/${{ github.repository }}/wazuh-indexer:latest
+      WAZUH_DASHBOARD_IMAGE: ghcr.io/${{ github.repository }}/wazuh-dashboard:latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible docker
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_DEPLOY_PRIVATE_KEY }}
+
+      - name: Ensure inventory and vars are ready
+        run: |
+          echo "[nodes]" > inventory.ini
+          echo "node1 ansible_host=${{ secrets.DASHBOARD_IP }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa role=dashboard" >> inventory.ini
+          echo "node2 ansible_host=${{ secrets.MANAGER_IP }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa role=manager run_indexer=true" >> inventory.ini
+
+      - name: Run Ansible deploy playbook
+        env:
+          ANSIBLE_FORCE_COLOR: "true"
+        run: |
+          ansible-playbook -i inventory.ini playbooks/deploy-wazuh.yml --vault-password-file <(echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}")
