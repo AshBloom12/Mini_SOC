@@ -1,0 +1,13 @@
+# deploy-wazuh.yml
+- name: Deploy Wazuh Stack
+  hosts: all
+  become: true
+  gather_facts: yes
+  vars_files:
+    - group_vars/all.yml
+    - group_vars/vault.yml    # encrypted
+  roles:
+    - swarm-init    # initializes swarm and joins other nodes
+    - networks      # creates overlay networks
+    - secrets       # creates Swarm secrets cluster-wide (on dashboard node)
+    - deploy-stack  # deploys/updates stack with rollback
