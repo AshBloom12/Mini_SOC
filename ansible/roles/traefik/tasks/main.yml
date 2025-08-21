@@ -1,1 +1,23 @@
+- name: Copy Traefik static config
+  copy:
+    src: "../../../security/tls/traefik/traefik.yml"
+    dest: "{{ traefik_static_file }}"
+    owner: root
+    group: root
+    mode: '0644'
 
+- name: Copy Traefik dynamic config
+  copy:
+    src: "../../../security/tls/traefik/dynamic.yml"
+    dest: "{{ traefik_dynamic_file }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Ensure ACME file exists
+  copy:
+    src: "../../../security/tls/traefik/acme.json"
+    dest: "{{ traefik_acme_file }}"
+    owner: root
+    group: root
+    mode: '0600'
