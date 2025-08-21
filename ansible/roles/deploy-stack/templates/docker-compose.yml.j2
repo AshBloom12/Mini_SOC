@@ -4,11 +4,42 @@ networks:
   wazuh-net:
     external: true
 
+secrets:
+  wazuh_api_user:
+    external: true
+  wazuh_api_password:
+    external: true
+  wazuh_api_key:
+    external: true
+  dashboard_tls_key:
+    external: true
+  dashboard_tls_crt:
+    external: true
+
 services:
   wazuh-manager:
     image: "{{ wazuh_image_manager }}"
     networks:
       - wazuh-net
+    secrets:
+      - source: wazuh_api_user
+        target: wazuh_api_user
+        mode: 0400
+      - source: wazuh_api_password
+        target: wazuh_api_password
+        mode: 0400
+      {% if wazuh_api_key is defined and wazuh_api_key|length > 0 %}
+      - source: wazuh_api_key
+        target: wazuh_api_key
+        mode: 0400
+      {% endif %}
+    environment:
+      # Preferred pattern: have image read credentials from files
+      WAZUH_API_USER_FILE: "/run/secrets/wazuh_api_user"
+      WAZUH_API_PASSWORD_FILE: "/run/secrets/wazuh_api_password"
+      {% if wazuh_api_key is defined and wazuh_api_key|length > 0 %}
+      WAZUH_API_KEY_FILE: "/run/secrets/wazuh_api_key"
+      {% endif %}
     deploy:
       replicas: 1
       placement:
@@ -45,6 +76,23 @@ services:
       - "{{ dashboard_port }}:{{ dashboard_port }}"
     networks:
       - wazuh-net
+    secrets:
+      - source: dashboard_tls_key
+        target: dashboard_tls_key
+        mode: 0400
+      - source: dashboard_tls_crt
+        target: dashboard_tls_crt
+        mode: 0444
+    environment:
+      # Let the dashboard know where to find TLS key/cert files
+      TLS_KEY_FILE: "/run/secrets/dashboard_tls_key"
+      TLS_CRT_FILE: "/run/secrets/dashboard_tls_crt"
+      # If dashboard talks to manager API with creds:
+      WAZUH_API_USER_FILE: "/run/secrets/wazuh_api_user"
+      WAZUH_API_PASSWORD_FILE: "/run/secrets/wazuh_api_password"
+      {% if wazuh_api_key is defined and wazuh_api_key|length > 0 %}
+      WAZUH_API_KEY_FILE: "/run/secrets/wazuh_api_key"
+      {% endif %}
     deploy:
       replicas: 1
       placement:
