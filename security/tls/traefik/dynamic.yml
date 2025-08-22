@@ -1,1 +1,16 @@
-# dynamic config
+# dynamic.yml - dynamic Traefik routes
+http:
+  routers:
+    wazuh-dashboard:
+      rule: "Host(`soc.cires.com`)"  # Match incoming requests
+      entryPoints:
+        - websecure                     # Listen on HTTPS
+      service: wazuh-dashboard
+      tls:
+        certResolver: letsencrypt       # Use ACME resolver. Tell Traefik to use Let’s Encrypt to generate/renew certificates automatically
+
+  services:
+    wazuh-dashboard:
+      loadBalancer:
+        servers:
+          - url: "http://wazuh-dashboard:5601"  # Internal service in Swarm
