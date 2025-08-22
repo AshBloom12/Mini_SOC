@@ -1,4 +1,4 @@
-# deploy-wazuh.yml
+# deploy.yml
 - name: Deploy Wazuh Stack
   hosts: all
   become: true
@@ -10,4 +10,5 @@
     - swarm-init    # initializes swarm and joins other nodes
     - networks      # creates overlay networks
     - secrets       # creates Swarm secrets cluster-wide (on dashboard node)
+    - traefik       # deploys Traefik reverse proxy with TLS/ACME
     - deploy-stack  # deploys/updates stack with rollback
