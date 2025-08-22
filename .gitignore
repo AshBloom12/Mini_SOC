@@ -1,1 +1,3 @@
-
+# Traefik stores Let’s Encrypt certs + private keys inside acme.json
+# If acme.json pushed to GitHub, attackers could steal our certs and impersonate our services
+acme.json
