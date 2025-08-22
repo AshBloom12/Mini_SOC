@@ -1,6 +1,15 @@
+---
+# Tasks for deploying Traefik in Docker Swarm
+
+- name: Create Traefik overlay network
+  docker_network:
+    name: "{{ traefik_network }}"
+    driver: overlay
+    scope: swarm
+
 - name: Copy Traefik static config
   copy:
-    src: "../../../security/tls/traefik/traefik.yml"
+    src: "{{ traefik_static_src }}"
     dest: "{{ traefik_static_file }}"
     owner: root
     group: root
@@ -8,7 +17,7 @@
 
 - name: Copy Traefik dynamic config
   copy:
-    src: "../../../security/tls/traefik/dynamic.yml"
+    src: "{{ traefik_dynamic_src }}"
     dest: "{{ traefik_dynamic_file }}"
     owner: root
     group: root
@@ -16,8 +25,35 @@
 
 - name: Ensure ACME file exists
   copy:
-    src: "../../../security/tls/traefik/acme.json"
+    src: "{{ traefik_acme_src }}"
     dest: "{{ traefik_acme_file }}"
     owner: root
     group: root
     mode: '0600'
+
+- name: Deploy Traefik Swarm service
+  docker_swarm_service:
+    name: traefik
+    image: traefik:latest
+    publish:
+      - published: 80
+        target: 80
+      - published: 443
+        target: 443
+    constraints:
+      - node.role == manager
+    networks:
+      - name: "{{ traefik_network }}"
+    mounts:
+      - source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        type: bind
+      - source: "{{ traefik_static_file }}"
+        target: /etc/traefik/traefik.yml
+        type: bind
+      - source: "{{ traefik_dynamic_file }}"
+        target: /etc/traefik/dynamic.yml
+        type: bind
+      - source: "{{ traefik_acme_file }}"
+        target: /acme/acme.json
+        type: bind
