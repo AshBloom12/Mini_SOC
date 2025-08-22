@@ -13,10 +13,35 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# This workflow contains 4 jobs called "build", "scan", "test" and "deploy" that run sequentially
+# This workflow contains 5 jobs called "lint", "build", "scan", "test" and "deploy" that run sequentially
 jobs:
+  # ---------------- LINT STAGE -----------------
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+
+    - name: Install linters
+      run: |
+        python -m pip install --upgrade pip
+        pip install ansible-lint yamllint
+
+    - name: Run Ansible Lint
+      run: ansible-lint .
+
+    - name: Run YAML Lint
+      run: yamllint .
   # ---------------- BUILD STAGE ----------------
   build:
+    # Runs after successfully finishing lint job
+    needs: lint
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     # Steps represent a sequence of tasks that will be executed as part of the job
