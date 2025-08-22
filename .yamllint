@@ -1,1 +1,24 @@
+# .yamllint checks YAML syntax and style. Useful for stack files, variable files, and playbooks.
 
+extends: default
+
+rules:
+  line-length:
+    max: 120      # Max characters per line
+    level: warning
+
+  indentation:
+    spaces: 2
+    level: error
+
+  trailing-spaces:
+    level: error
+
+  document-start:
+    present: false
+
+  comments-indentation:
+    level: warning
+
+  key-ordering:
+    level: warning
