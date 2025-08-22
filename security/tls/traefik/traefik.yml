@@ -1,1 +1,25 @@
-# static config
+# traefik.yml - static Traefik config
+entryPoints:
+  web:
+    address: ":80"          # HTTP
+  websecure:
+    address: ":443"         # HTTPS
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    swarmMode: true
+    exposedByDefault: false  # Only services with traefik.enable=true are routed
+
+# Enable automatic Let’s Encrypt certificate issuance and renewal.
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      # Leave empty if you don't want notifications for this project
+      # email: ""  
+      storage: /acme/acme.json  # Where Traefik stores certs and keys
+      httpChallenge:
+        entryPoint: web        # Use HTTP-01 challenge on port 80
+
+log:
+  level: INFO
