@@ -1,1 +1,77 @@
+version: "3.9"
 
+networks:
+  traefik-public:
+    external: true
+  wazuh-net:
+    driver: overlay
+
+volumes:
+  wazuh-indexer-data:
+  wazuh-manager-data:
+  wazuh-dashboard-data:
+
+services:
+
+  # ------------------------------
+  # Wazuh Indexer (Elasticsearch)
+  # ------------------------------
+  wazuh-indexer:
+    image: wazuh/wazuh-indexer:latest
+    environment:
+      - cluster.name=wazuh-cluster
+      - node.name=indexer
+      - discovery.type=single-node
+    volumes:
+      - wazuh-indexer-data:/usr/share/elasticsearch/data
+    networks:
+      - wazuh-net
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == node2  # Pin to manager+indexer VM
+
+  # ------------------------------
+  # Wazuh Manager
+  # ------------------------------
+  wazuh-manager:
+    image: wazuh/wazuh-manager:latest
+    environment:
+      - ELASTICSEARCH_HOST=wazuh-indexer
+      - ELASTICSEARCH_PORT=9200
+    volumes:
+      - wazuh-manager-data:/var/ossec/data
+    networks:
+      - wazuh-net
+    depends_on:
+      - wazuh-indexer
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == node2  # Pin to manager+indexer VM
+
+  # ------------------------------
+  # Wazuh Dashboard (Kibana)
+  # ------------------------------
+  wazuh-dashboard:
+    image: wazuh/wazuh-dashboard:latest
+    environment:
+      - ELASTICSEARCH_HOST=wazuh-indexer
+      - ELASTICSEARCH_PORT=9200
+    networks:
+      - traefik-public
+      - wazuh-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wazuh-dashboard.rule=Host(`soc.cires.com`)"
+      - "traefik.http.routers.wazuh-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.wazuh-dashboard.tls.certresolver=letsencrypt"
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == node1  # Pin to dashboard+Traefik VM
+    volumes:
+      - wazuh-dashboard-data:/usr/share/kibana/data
