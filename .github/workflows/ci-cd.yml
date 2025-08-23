@@ -17,7 +17,7 @@ on:
 jobs:
   # ---------------- LINT STAGE -----------------
   lint:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
     - name: Checkout code
@@ -43,7 +43,7 @@ jobs:
     # Runs after successfully finishing lint job
     needs: lint
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Checkout repository
@@ -68,7 +68,7 @@ jobs:
   # ---------------- SECURITY SCAN ----------------
   scan:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Scan Wazuh Manager
         uses: aquasecurity/trivy-action@0.32.0
@@ -105,7 +105,7 @@ jobs:
   # ---------------- SELENIUM TESTS ----------------
   test:
     needs: scan
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     # Use the official selenium/standalone-chrome container to run tests remotely⁠
     services:
       selenium:
@@ -136,7 +136,7 @@ jobs:
   # -------------------- DEPLOY --------------------
   deploy:
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: serversideup/github-action-docker-swarm-deploy@v3
         with:
