@@ -1,4 +1,13 @@
 # deploy.yml
+- name: Log in to GitHub Container Registry on Swarm nodes
+  hosts: all
+  become: true
+  tasks:
+    - name: Login to GHCR
+      docker_login:
+        registry_url: ghcr.io
+        username: "{{ lookup('env', 'GITHUB_ACTOR') }}"
+        password: "{{ lookup('env', 'GHCR_TOKEN') }}"
 - name: Deploy Wazuh Stack
   hosts: all
   become: true
