@@ -104,40 +104,9 @@ jobs:
             trivy-manager-report.json
             trivy-indexer-report.json
             trivy-dashboard-report.json
-  # ---------------- SELENIUM TESTS ----------------
-  test:
-    needs: scan
-    runs-on: self-hosted
-    # Use the official selenium/standalone-chrome container to run tests remotely⁠
-    services:
-      selenium:
-        image: selenium/standalone-chrome:latest
-        ports:
-          - 4444:4444
-
-    env:
-      WAZUH_DASHBOARD_URL: ${{ secrets.WAZUH_DASHBOARD_URL }}
-      WAZUH_API_URL: ${{ secrets.WAZUH_API_URL }}
-      WAZUH_API_USER: ${{ secrets.WAZUH_API_USER }}
-      WAZUH_API_PASS: ${{ secrets.WAZUH_API_PASS }}
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        
-      - name: Install dependencies
-        run: |
-          pip install -r tests/selenium/requirements.txt
-          pip install requests pytest
-          
-      - name: Run Selenium tests
-        run: pytest tests/selenium -v
-        
-      - name: Run API health test
-        run: pytest tests/api -v
   # -------------------- DEPLOY --------------------
   deploy:
-    needs: test
+    needs: scan
     runs-on: self-hosted
    
     env:
@@ -175,3 +144,36 @@ jobs:
       - name: Verify Wazuh health (basic)
         run: |
           ansible -i ansible/inventory/hosts.yml node2 -m shell -a "docker ps --format 'table {{.Names}}\t{{.Status}}' | grep -E 'wazuh|indexer|manager'" -b
+
+  # ---------------- SELENIUM TESTS ----------------
+  test:
+    needs: deploy
+    runs-on: self-hosted
+    # Use the official selenium/standalone-chrome container to run tests remotely⁠
+    services:
+      selenium:
+        image: selenium/standalone-chrome:latest
+        ports:
+          - 4444:4444
+
+    env:
+      WAZUH_DASHBOARD_URL: ${{ secrets.WAZUH_DASHBOARD_URL }}
+      WAZUH_API_URL: ${{ secrets.WAZUH_API_URL }}
+      WAZUH_API_USER: ${{ secrets.WAZUH_API_USER }}
+      WAZUH_API_PASS: ${{ secrets.WAZUH_API_PASS }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Install dependencies
+        run: |
+          pip install -r tests/selenium/requirements.txt
+          pip install requests pytest
+          
+      - name: Run Selenium tests
+        run: pytest tests/selenium -v
+        
+      - name: Run API health test
+        run: pytest tests/api -v
+  
