@@ -10,14 +10,14 @@ This policy applies to:
 - Reverse proxy (Traefik) that terminates TLS.
 
 ## 3. TLS Termination
-- All external HTTPS connections are terminated at **Traefik** (running on the Dashboard node).
-- Traefik uses **Let’s Encrypt ACME** certificates for automatic provisioning and renewal.
-- Certificates are stored securely in the file `acme.json` with strict permissions (`0600`).
+- All external HTTPS connections are terminated at Traefik (running on the Dashboard node).
+- Traefik uses a self-signed certificate generated manually for the public IP address of the Dashboard node.
+- Certificates and keys are securely stored and injected into the deployment using Ansible Vault.
 
 ## 4. Certificate Management
-- **Public Access:** Let’s Encrypt certificates are obtained automatically for public domains.
-- **Fallback:** For testing or internal setups without a domain, self-signed certificates may be used.
-- **Renewal:** Let’s Encrypt certificates renew automatically via ACME. Self-signed certificates must be regenerated manually every 12 months if used.
+- **Public Access:** Since no public domain is available, a self-signed certificate is used for external access.
+- **Renewal:** Self-signed certificates must be manually regenerated at least every 12 months.
+- **Storage:** Certificates and private keys are never stored in plain text inside the repository. They are encrypted with Ansible Vault.
 
 ## 5. Protocols and Cipher Suites
 - TLS 1.2 and TLS 1.3 are required.
@@ -25,26 +25,25 @@ This policy applies to:
 - Strong ciphers are enforced (no known weak algorithms such as RC4, MD5, or SHA1).
 
 ## 6. Trust Model
-- For public certificates: Clients automatically trust Let’s Encrypt CA.
-- For self-signed/internal certificates: The certificate must be manually distributed and installed in trusted stores of client systems.
+- For self-signed certificates: The certificate must be manually distributed and installed in trusted stores of client systems.
+- Users accessing the Wazuh Dashboard must accept the self-signed certificate in their browser or import it into their system trust store.
 
 ## 7. Security Controls
-- The `acme.json` file storing certificates and keys is protected with `0600` permissions.
-- Only the Traefik service user has access to certificate files.
-- Certificates and keys must never be stored in version control repositories.
-- Secrets are injected via **Docker Swarm secrets** where possible.
+- The certificate and private key are encrypted in `ansible/inventory/production/group_vars/vault.yml` using **Ansible Vault**.
+- Only the Traefik service has access to the decrypted certificate and key at runtime.
+- Certificates and keys must never be committed in plain text to version control repositories.
+- Access to Ansible Vault requires a passphrase known only to the project administrators.
 
 ## 8. Incident Handling
-- If a certificate is compromised, it must be revoked immediately via Let’s Encrypt ACME.
-- A new certificate must be requested and deployed without delay.
-- All nodes and users must be notified of the incident.
+- If a certificate or private key is compromised, it must be replaced immediately with a newly generated self-signed certificate.
+- All nodes and users must be notified of the incident and instructed to update their trust store if required.
 
 ## 9. Exceptions
-- For the Mini-SOC educational project, certificate expiration monitoring and automated alerting is not enforced.
-- In production, continuous monitoring of TLS certificate status is required.
+- For the Mini-SOC project, automated certificate expiration monitoring is not enforced.
+- In production environments, automated certificate lifecycle management (e.g., Let’s Encrypt or an internal CA) must be implemented.
 
 ## 10. Review
 This TLS/HTTPS policy must be reviewed at least annually or after any major change in:
 - TLS protocols or cipher vulnerabilities.
 - Certificate management practices.
-- Infrastructure hosting (e.g., migration to new cloud provider).
+- Infrastructure hosting (e.g., migration to a new cloud provider).

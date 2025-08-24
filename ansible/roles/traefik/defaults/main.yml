@@ -1,11 +1,8 @@
 ---
 # Default variables for Traefik role
 
-# Email used for Let's Encrypt ACME registration
-traefik_email: ""
-
-# Domain for Wazuh dashboard (public DNS must point to your AWS instance)
-traefik_domain: "soc.cires.com"
+# Domain or IP for Wazuh dashboard (used in self-signed cert)
+traefik_domain: "{{ traefik_domain }}"
 
 # Overlay network name for Traefik
 traefik_network: "traefik-public"
@@ -13,9 +10,9 @@ traefik_network: "traefik-public"
 # Paths on target node where configs will be placed
 traefik_static_file: "/etc/traefik/traefik.yml"
 traefik_dynamic_file: "/etc/traefik/dynamic.yml"
-traefik_acme_file: "/etc/traefik/acme.json"
+traefik_cert_file: "/etc/traefik/certs/cert.pem"
+traefik_key_file: "/etc/traefik/certs/key.pem"
 
 # Source paths (from repo/project structure)
 traefik_static_src: "security/tls/traefik/traefik.yml"
 traefik_dynamic_src: "security/tls/traefik/dynamic.yml"
-traefik_acme_src: "security/tls/traefik/acme.json"

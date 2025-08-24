@@ -23,10 +23,26 @@
     group: root
     mode: '0644'
 
-- name: Ensure ACME file exists
+- name: Ensure certs directory exists
+  file:
+    path: /etc/traefik/certs
+    state: directory
+    owner: root
+    group: root
+    mode: '0700'
+
+- name: Deploy TLS certificate (from Ansible Vault)
   copy:
-    src: "{{ traefik_acme_src }}"
-    dest: "{{ traefik_acme_file }}"
+    content: "{{ traefik_certificate }}"
+    dest: "{{ traefik_cert_file }}"
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Deploy TLS private key (from Ansible Vault)
+  copy:
+    content: "{{ traefik_private_key }}"
+    dest: "{{ traefik_key_file }}"
     owner: root
     group: root
     mode: '0600'
@@ -54,6 +70,9 @@
       - source: "{{ traefik_dynamic_file }}"
         target: /etc/traefik/dynamic.yml
         type: bind
-      - source: "{{ traefik_acme_file }}"
-        target: /acme/acme.json
+      - source: "{{ traefik_cert_file }}"
+        target: /certs/cert.pem
+        type: bind
+      - source: "{{ traefik_key_file }}"
+        target: /certs/key.pem
         type: bind
