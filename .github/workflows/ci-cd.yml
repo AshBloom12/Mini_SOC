@@ -54,7 +54,7 @@ jobs:
         run: |
           docker build -t ghcr.io/${{ github.repository }}/wazuh-manager:latest ./wazuh/manager
           docker build -t ghcr.io/${{ github.repository }}/wazuh-indexer:latest ./wazuh/indexer
-          docker build -t ghcr.io/${{ github.repository }}/wazuh-dashboard:latest ./wazuh/dashboard
+          docker build -t ghcr.io/${{ github.repository }}/wazuh-dashboard:latest -f ./docker/Dockerfile ./wazuh/dashboard
           
       - name: Push images
         run: |
