@@ -1,9 +1,6 @@
 ---
 # Default variables for Traefik role
 
-# Domain or IP for Wazuh dashboard (used in self-signed cert)
-traefik_domain: "{{ traefik_domain }}"
-
 # Overlay network name for Traefik
 traefik_network: "traefik-public"
 

@@ -65,9 +65,10 @@ services:
       - wazuh-net
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.wazuh-dashboard.rule=Host(`soc.cires.com`)"
+      - "traefik.http.routers.wazuh-dashboard.rule=PathPrefix(`/`)"
       - "traefik.http.routers.wazuh-dashboard.entrypoints=websecure"
-      - "traefik.http.routers.wazuh-dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.wazuh-dashboard.tls.certificates[0].certFile=/certs/cert.pem"
+      - "traefik.http.routers.wazuh-dashboard.tls.certificates[0].keyFile=/certs/key.pem"
     deploy:
       replicas: 1
       placement:

@@ -2,7 +2,7 @@
 http:
   routers:
     wazuh-dashboard:
-      rule: "Host(`{{ traefik_domain }}`)"
+      rule: "PathPrefix(`/`)"
       entryPoints:
         - websecure
       service: wazuh-dashboard
