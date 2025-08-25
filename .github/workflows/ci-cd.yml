@@ -49,11 +49,11 @@ jobs:
       # Build intentionally vulnerable dashboard image
       - name: Build vulnerable dashboard image
         run: |
-          docker build -t ghcr.io/myproject/wazuh-dashboard:latest -f docker/Dockerfile docker/
+          docker build -t ghcr.io/ashbloom12/mini_soc/wazuh-dashboard:latest -f docker/Dockerfile docker/
 
       # Push dashboard image to GHCR
       - name: Push Wazuh Dashboard image
-        run: docker push ghcr.io/myproject/wazuh-dashboard:latest
+        run: docker push ghcr.io/ashbloom12/mini_soc/wazuh-dashboard:latest
   # ---------------- SECURITY SCAN ----------------
   scan:
     needs: build
