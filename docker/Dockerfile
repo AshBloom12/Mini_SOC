@@ -1,22 +1,20 @@
-# Intentionally vulnerable image to test trivy scan
-# Use an older base image with known vulnerabilities
+# Intentionally vulnerable image for testing Trivy
 FROM ubuntu:18.04
 
-# Install required packages (including outdated versions to trigger Trivy)
+# Install outdated packages to trigger vulnerabilities
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    curl=7.58.0-2ubuntu3.16 \
-    nodejs \
-    npm \
-    openssl=1.1.1-1ubuntu2.1~18.04.20 && \
-    rm -rf /var/lib/apt/lists/*
+        curl=7.58.0-2ubuntu3.16 \
+        nodejs \
+        npm \
+        openssl=1.1.1-1ubuntu2.1~18.04.20 && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir /app && \
+    echo 'console.log("Vulnerable test dashboard")' > /app/index.js
 
-# Copy the actual Wazuh dashboard files from build context
-COPY . /app
 WORKDIR /app
 
-# Install Node dependencies
-RUN npm install
+# Install node dependencies (none for now)
+RUN npm init -y
 
-# Default command to run dashboard
-CMD ["npm", "start"]
+CMD ["node", "index.js"]
