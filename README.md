@@ -27,6 +27,7 @@ This repo shows how to build, scan, test, and deploy Wazuh securely using **GitH
 
 ### Diagram
 
+```mermaid
 flowchart LR
     GH[GitHub Repo] -->|Push| Runner["Self-Hosted Runner (VM1)"]
     Runner -->|Build & Scan| DockerImages["Docker Images"]
@@ -34,6 +35,7 @@ flowchart LR
     Swarm --> VM2["VM2 (Manager): Wazuh Dashboard + Traefik"]
     Swarm --> VM3["VM3 (Worker): Wazuh Manager + Wazuh Indexer"]
     VM2 -->|HTTPS| User["End User / Analyst"]
+```
 
 ### Services
 - **Wazuh Stack**: Indexer, Manager, Dashboard  
