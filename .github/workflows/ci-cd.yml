@@ -55,6 +55,7 @@ jobs:
       - name: Prepare dashboard build context
         run: |
           mkdir -p ./wazuh/dashboard
+          docker rm -f temp_dashboard || true
           docker create --name temp_dashboard wazuh/wazuh-dashboard:4.13.0-beta2
           docker cp temp_dashboard:/usr/share/wazuh-dashboard ./wazuh/dashboard
           docker rm temp_dashboard
