@@ -35,6 +35,7 @@ flowchart LR
     Swarm --> VM2["VM2 (Manager): Wazuh Dashboard + Traefik"]
     Swarm --> VM3["VM3 (Worker): Wazuh Manager + Wazuh Indexer"]
     VM2 -->|HTTPS| User["End User / Analyst"]
+    VM2 <--> VM3
 ```
 
 ### Services

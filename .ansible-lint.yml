@@ -1,0 +1,11 @@
+# .ansible-lint.yml
+skip_list:
+  - 206  # Using command instead of module (allow in some cases)
+  - 305  # Tasks with too many arguments (can happen in complex tasks)
+
+# Optional: paths to lint
+# lint_paths:
+#   - playbooks/
+#   - roles/
+
+verbosity: 1

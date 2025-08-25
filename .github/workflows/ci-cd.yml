@@ -26,11 +26,12 @@ jobs:
         sudo apt update
         sudo apt install -y ansible-lint yamllint
 
+    - name: Run YAML Lint
+      run: yamllint .
+
     - name: Run Ansible Lint
       run: ansible-lint .
 
-    - name: Run YAML Lint
-      run: yamllint .
   # ---------------- BUILD STAGE ----------------
   build:
     # Runs after successfully finishing lint job
