@@ -27,15 +27,13 @@ This repo shows how to build, scan, test, and deploy Wazuh securely using **GitH
 
 ### Diagram
 
-```mermaid
 flowchart LR
-    GH[GitHub Repo] -->|Push| Runner[Self-Hosted Runner (VM1)]
-    Runner -->|Build & Scan| DockerImages[Docker Images]
-    Runner -->|Deploy via Ansible| Swarm[Docker Swarm]
-    Swarm --> VM2[VM2 (Manager): Wazuh Dashboard + Traefik]
-    Swarm --> VM3[VM3 (Worker): Wazuh Mnaager + Wazuh Indexer]
-    VM2 -->|HTTPS| User[End User / Analyst]
-```
+    GH[GitHub Repo] -->|Push| Runner["Self-Hosted Runner (VM1)"]
+    Runner -->|Build & Scan| DockerImages["Docker Images"]
+    Runner -->|Deploy via Ansible| Swarm["Docker Swarm Cluster"]
+    Swarm --> VM2["VM2 (Manager): Wazuh Dashboard + Traefik"]
+    Swarm --> VM3["VM3 (Worker): Wazuh Manager + Wazuh Indexer"]
+    VM2 -->|HTTPS| User["End User / Analyst"]
 
 ### Services
 - **Wazuh Stack**: Indexer, Manager, Dashboard  
@@ -180,7 +178,7 @@ trivy image --exit-code 1 --severity CRITICAL,HIGH image:tag
 Run locally:
 
 ```bash
-pip install -r tests/selenium/requirements.txt
+pip3 install -r tests/selenium/requirements.txt
 pytest -q tests/selenium/test_dashboard.py
 ```
 
@@ -197,7 +195,6 @@ pytest -q tests/api/test_health.py
 
 ---
 
-````markdown
 ## 🚀 Deployment
 
 ### 1️⃣ Deploy Stack
@@ -206,7 +203,7 @@ Deploy the Wazuh stack to your Docker Swarm cluster using Ansible:
 
 ```bash
 ansible-playbook -i ansible/inventories/production/hosts.yml ansible/playbooks/deploy.yml
-````
+```
 
 **Prerequisites:**
 
