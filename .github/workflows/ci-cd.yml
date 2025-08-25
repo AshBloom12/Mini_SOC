@@ -61,6 +61,8 @@ jobs:
       - name: Create and extract Wazuh dashboard files
         run: |
           docker create --name temp_dashboard wazuh/wazuh-dashboard:4.13.0-beta2
+      - name: Copy Wazuh dashboard files
+        run: |
           docker cp temp_dashboard:/usr/share/wazuh-dashboard ./wazuh/dashboard
           docker rm temp_dashboard
           rm -f ./wazuh/dashboard/wazuh-dashboard/config/certs/dashboard-key.pem
