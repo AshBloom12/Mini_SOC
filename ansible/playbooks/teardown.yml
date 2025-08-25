@@ -20,7 +20,7 @@
       loop: "{{ docker_networks }}"
       ignore_errors: true
 
-        - name: Remove Swarm secrets (dashboard node only)
+    - name: Remove Swarm secrets (dashboard node only)
       docker_secret:
         name: "{{ item.key }}"
         state: absent

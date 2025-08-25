@@ -32,14 +32,9 @@ flowchart LR
     GH[GitHub Repo] -->|Push| Runner["Self-Hosted Runner (VM1)"]
     Runner -->|Build & Scan| DockerImages["Docker Images"]
     Runner -->|Deploy via Ansible| Swarm["Docker Swarm Cluster"]
-
-    subgraph Cluster ["Docker Swarm Cluster"]
-        VM2["VM2 (Manager): Wazuh Dashboard + Traefik"]
-        VM3["VM3 (Worker): Wazuh Manager + Wazuh Indexer"]
-    end
-
-    VM2 <--> VM3
-    VM2 -->|HTTPS| User["End User / Analyst"]
+    Swarm --> VM2["VM2 (Manager): Wazuh Dashboard + Traefik"]
+    Swarm --> VM3["VM3 (Worker): Wazuh Manager + Wazuh Indexer"]
+    VM2 -->|HTTPS| User["End User / SOC Analyst"]
 ```
 
 ### Services

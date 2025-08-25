@@ -177,4 +177,3 @@ jobs:
         
       - name: Run API health test
         run: pytest tests/api -v
-  
