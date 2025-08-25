@@ -34,7 +34,7 @@ flowchart LR
     Runner -->|Deploy via Ansible| Swarm["Docker Swarm Cluster"]
     Swarm --> VM2["VM2 (Manager): Wazuh Dashboard + Traefik"]
     Swarm --> VM3["VM3 (Worker): Wazuh Manager + Wazuh Indexer"]
-    VM2 -->|HTTPS| User["End User / SOC Analyst"]
+    VM2 -->|HTTPS| User["SOC Analyst"]
 ```
 
 ### Services
