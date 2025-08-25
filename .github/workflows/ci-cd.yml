@@ -21,11 +21,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install linters
-      run: |
-        sudo apt update
-        sudo apt install -y ansible-lint yamllint
-
     - name: Run YAML Lint
       run: yamllint .
 
@@ -50,18 +45,20 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
+
+      # Set environment variables for the images
+      - name: Set image environment variables
+        run: |
+          echo "WAZUH_MANAGER_IMAGE=wazuh/wazuh:latest" >> $GITHUB_ENV
+          echo "WAZUH_INDEXER_IMAGE=wazuh/wazuh-indexer:latest" >> $GITHUB_ENV
+          echo "WAZUH_DASHBOARD_IMAGE=ghcr.io/myproject/wazuh-dashboard:latest" >> $GITHUB_ENV
+
       - name: Build Wazuh Docker images
         run: |
-          docker build -t ghcr.io/myproject/wazuh-manager:latest ./wazuh/manager
-          docker build -t ghcr.io/myproject/wazuh-indexer:latest ./wazuh/indexer
-          docker build -t ghcr.io/myproject/wazuh-dashboard:latest -f ./docker/Dockerfile ./wazuh/dashboard
+          docker build -t $WAZUH_DASHBOARD_IMAGE -f ./docker/Dockerfile ./wazuh/dashboard
           
-      - name: Push images
-        run: |
-          docker push ghcr.io/myproject/wazuh-manager:latest
-          docker push ghcr.io/myproject/wazuh-indexer:latest
-          docker push ghcr.io/myproject/wazuh-dashboard:latest
+      - name: Push Wazuh Dashboard image
+        run: docker push $WAZUH_DASHBOARD_IMAGE
   # ---------------- SECURITY SCAN ----------------
   scan:
     needs: build
@@ -74,7 +71,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.32.0
         with:
           scan-type: image
-          image-ref: ghcr.io/myproject/wazuh-manager:latest
+          image-ref: ${{ env.WAZUH_MANAGER_IMAGE }}
           trivy-config: trivy/trivy.yaml
           format: json
           output: trivy-manager-report.json
@@ -83,7 +80,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.32.0
         with:
           scan-type: image
-          image-ref: ghcr.io/myproject/wazuh-indexer:latest
+          image-ref: ${{ env.WAZUH_INDEXER_IMAGE }}
           trivy-config: trivy/trivy.yaml
           format: json
           output: trivy-indexer-report.json
@@ -92,7 +89,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.32.0
         with:
           scan-type: image
-          image-ref: ghcr.io/myproject/wazuh-dashboard:latest
+          image-ref: ${{ env.WAZUH_DASHBOARD_IMAGE }}
           trivy-config: trivy/trivy.yaml
           format: json
           output: trivy-dashboard-report.json
