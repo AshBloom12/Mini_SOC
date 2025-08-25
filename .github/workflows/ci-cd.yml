@@ -53,15 +53,15 @@ jobs:
           
       - name: Build Wazuh Docker images
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/wazuh-manager:latest ./wazuh/manager
-          docker build -t ghcr.io/${{ github.repository }}/wazuh-indexer:latest ./wazuh/indexer
-          docker build -t ghcr.io/${{ github.repository }}/wazuh-dashboard:latest -f ./docker/Dockerfile ./wazuh/dashboard
+          docker build -t ghcr.io/myproject/wazuh-manager:latest ./wazuh/manager
+          docker build -t ghcr.io/myproject/wazuh-indexer:latest ./wazuh/indexer
+          docker build -t ghcr.io/myproject/wazuh-dashboard:latest -f ./docker/Dockerfile ./wazuh/dashboard
           
       - name: Push images
         run: |
-          docker push ghcr.io/${{ github.repository }}/wazuh-manager:latest
-          docker push ghcr.io/${{ github.repository }}/wazuh-indexer:latest
-          docker push ghcr.io/${{ github.repository }}/wazuh-dashboard:latest
+          docker push ghcr.io/myproject/wazuh-manager:latest
+          docker push ghcr.io/myproject/wazuh-indexer:latest
+          docker push ghcr.io/myproject/wazuh-dashboard:latest
   # ---------------- SECURITY SCAN ----------------
   scan:
     needs: build
@@ -74,7 +74,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.32.0
         with:
           scan-type: image
-          image-ref: ghcr.io/${{ github.repository }}/wazuh-manager:latest
+          image-ref: ghcr.io/myproject/wazuh-manager:latest
           trivy-config: trivy/trivy.yaml
           format: json
           output: trivy-manager-report.json
@@ -83,7 +83,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.32.0
         with:
           scan-type: image
-          image-ref: ghcr.io/${{ github.repository }}/wazuh-indexer:latest
+          image-ref: ghcr.io/myproject/wazuh-indexer:latest
           trivy-config: trivy/trivy.yaml
           format: json
           output: trivy-indexer-report.json
@@ -92,7 +92,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.32.0
         with:
           scan-type: image
-          image-ref: ghcr.io/${{ github.repository }}/wazuh-dashboard:latest
+          image-ref: ghcr.io/myproject/wazuh-dashboard:latest
           trivy-config: trivy/trivy.yaml
           format: json
           output: trivy-dashboard-report.json
@@ -111,9 +111,9 @@ jobs:
     runs-on: self-hosted
    
     env:
-      WAZUH_MANAGER_IMAGE: ghcr.io/${{ github.repository }}/wazuh-manager:latest
-      WAZUH_INDEXER_IMAGE: ghcr.io/${{ github.repository }}/wazuh-indexer:latest
-      WAZUH_DASHBOARD_IMAGE: ghcr.io/${{ github.repository }}/wazuh-dashboard:latest
+      WAZUH_MANAGER_IMAGE: ghcr.io/myproject/wazuh-manager:latest
+      WAZUH_INDEXER_IMAGE: ghcr.io/myproject/wazuh-indexer:latest
+      WAZUH_DASHBOARD_IMAGE: ghcr.io/myproject/wazuh-dashboard:latest
       ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
       GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_ACTOR: ${{ github.actor }}
