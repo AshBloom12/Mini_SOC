@@ -53,10 +53,24 @@ jobs:
           echo "WAZUH_INDEXER_IMAGE=wazuh/wazuh-indexer:latest" >> $GITHUB_ENV
           echo "WAZUH_DASHBOARD_IMAGE=ghcr.io/myproject/wazuh-dashboard:latest" >> $GITHUB_ENV
 
-      - name: Build Wazuh Docker images
+      # Pull official images for manager and indexer
+      - name: Pull official Wazuh dashboard image
         run: |
-          docker build -t $WAZUH_DASHBOARD_IMAGE -f ./docker/Dockerfile ./wazuh/dashboard
-          
+          docker pull wazuh/wazuh-dashboard:latest
+
+      # Extract Wazuh dashboard files temporarily in runner
+      - name: Prepare dashboard build context
+        run: |
+          mkdir -p ./wazuh/dashboard
+          docker create --name temp_dashboard wazuh/wazuh-dashboard:latest
+          docker cp temp_dashboard:/usr/share/wazuh-dashboard ./wazuh/dashboard
+          docker rm temp_dashboard
+
+      # Build custom dashboard image
+      - name: Build Wazuh Dashboard image
+        run: docker build -t $WAZUH_DASHBOARD_IMAGE -f ./docker/Dockerfile ./wazuh/dashboard
+
+      # Push dashboard image to GHCR
       - name: Push Wazuh Dashboard image
         run: docker push $WAZUH_DASHBOARD_IMAGE
   # ---------------- SECURITY SCAN ----------------
