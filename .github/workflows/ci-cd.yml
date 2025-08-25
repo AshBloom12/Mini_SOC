@@ -64,6 +64,8 @@ jobs:
       - name: Copy Wazuh dashboard files
         run: |
           docker cp temp_dashboard:/usr/share/wazuh-dashboard ./wazuh/dashboard
+      - name: Clean up temporary files
+        run: |
           docker rm temp_dashboard
           rm -f ./wazuh/dashboard/wazuh-dashboard/config/certs/dashboard-key.pem
           rm -f ./wazuh/dashboard/wazuh-dashboard/config/certs/dashboard-crt.pem      
