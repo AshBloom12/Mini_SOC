@@ -19,6 +19,3 @@ rules:
 
   comments-indentation:
     level: warning
-
-  key-ordering:
-    level: warning

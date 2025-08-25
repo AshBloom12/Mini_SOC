@@ -44,21 +44,23 @@ flowchart LR
 - **Persistent Volumes**: Wazuh data stored in Docker volumes  
 
 ### Data Flow
-1. CI/CD pipeline builds and scans Docker images.  
-2. Ansible deploys the Wazuh stack to Docker Swarm.  
-3. Traefik exposes the Wazuh dashboard securely over HTTPS.  
-4. Selenium tests validate dashboard accessibility and login form.  
-5. API tests validate Wazuh Manager health.  
+1. CI/CD pipeline checks first YAML synatx and ensures ensures Ansible logic is correct.
+2. Self-hosted runner builds and scans Docker images.  
+3. Ansible deploys the Wazuh stack to Docker Swarm.  
+4. Traefik exposes the Wazuh dashboard securely over HTTPS.  
+5. Selenium tests validate dashboard accessibility and login form.  
+6. API tests validate Wazuh Manager health.  
 
 ---
 
 ## ⚙️ CI/CD Pipeline
 
 ### Stages
-1. **Build** → Build container images  
-2. **Scan** → Scan with **Trivy**, fail on High/Critical vulnerabilities  
-3. **Deploy** → Deploy stack to Swarm with **Ansible**  
-4. **Tests** → Run Selenium (HTTPS validation) + API probes  
+1. **Lint** → Check YAML syntax and Ansible-specific rules
+2. **Build** → Build container images  
+3. **Scan** → Scan with **Trivy**, fail on High/Critical vulnerabilities  
+4. **Deploy** → Deploy stack to Swarm with **Ansible**  
+5. **Tests** → Run Selenium (HTTPS validation) + API probes  
 
 > Tests are executed **after deployment** since HTTPS validation requires running services.
 
@@ -93,7 +95,7 @@ tests/
 └─ api/test\_health.py                 # Wazuh API probe
 trivy/trivy.yaml                      # Trivy config
 trivy/.trivyignore
-.ansible-lint
+.ansible-lint.yml
 .yamllint
 README.md
 
@@ -119,14 +121,13 @@ Edit `ansible/inventories/production/hosts.yml` with your VM IPs:
 ```yaml
 all:
   children:
-    swarm_manager:
+    nodes:
       hosts:
-        vm3-manager:
-          ansible_host: 10.0.3.10
-    swarm_workers:
-      hosts:
-        vm2-worker:
-          ansible_host: 10.0.2.10
+        node1:   # Dashboard node (also Swarm manager)
+          ansible_host: 10.0.1.44
+
+        node2:   # Manager/indexer node
+          ansible_host: 10.0.2.30
 ```
 
 ---
@@ -167,7 +168,7 @@ Example:
 trivy image --exit-code 1 --severity CRITICAL,HIGH image:tag
 ```
 
-- **Linting**: `.ansible-lint` and `.yamllint` ensure code quality 
+- **Linting**: `.ansible-lint.yml` and `.yamllint` ensure code quality 
 
 ---
 
