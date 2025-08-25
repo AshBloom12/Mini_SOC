@@ -1,4 +1,3 @@
----
 # Create overlay networks for Wazuh stack
 - name: Create Wazuh overlay networks
   docker_network:

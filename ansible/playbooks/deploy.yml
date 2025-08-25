@@ -11,7 +11,7 @@
 - name: Deploy Wazuh Stack
   hosts: all
   become: true
-  gather_facts: yes
+  gather_facts: true
   vars_files:
     - group_vars/all.yml
     - group_vars/vault.yml    # encrypted

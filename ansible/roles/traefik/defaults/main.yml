@@ -1,4 +1,3 @@
----
 # Default variables for Traefik role
 
 # Overlay network name for Traefik

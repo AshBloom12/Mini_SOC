@@ -1,4 +1,3 @@
----
 # Tasks for deploying Traefik in Docker Swarm
 
 - name: Create Traefik overlay network

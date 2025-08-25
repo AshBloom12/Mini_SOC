@@ -1,4 +1,3 @@
----
 # Initialize Docker Swarm on the dashboard node
 - name: Initialize Docker Swarm on dashboard node
   docker_swarm:

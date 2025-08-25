@@ -1,7 +1,7 @@
 - name: Teardown Wazuh Stack
   hosts: all
   become: true
-  gather_facts: yes
+  gather_facts: true
   vars_files:
     - group_vars/all.yml
     - group_vars/vault.yml    # encrypted, needed if we want to remove secrets
@@ -11,37 +11,36 @@
       docker_stack:
         name: "{{ swarm_stack_name }}"
         state: absent
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Remove overlay networks
       docker_network:
         name: "{{ item.name }}"
         state: absent
       loop: "{{ docker_networks }}"
-      ignore_errors: yes
+      ignore_errors: true
 
-    - name: Remove Swarm secrets (dashboard node only)
+        - name: Remove Swarm secrets (dashboard node only)
       docker_secret:
         name: "{{ item.key }}"
         state: absent
       loop:
-        - { key: "wazuh_api_user" }
-        - { key: "wazuh_api_password" }
-        - { key: "wazuh_api_key" }
-        - { key: "dashboard_tls_key" }
-        - { key: "dashboard_tls_crt" }
+        - key: "wazuh_api_user"
+        - key: "wazuh_api_password"
+        - key: "wazuh_api_key"
+        - key: "dashboard_tls_key"
+        - key: "dashboard_tls_crt"
       when: hostvars[inventory_hostname].role == "dashboard"
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Leave Docker Swarm (non-dashboard nodes)
       docker_swarm:
         state: absent
       when: hostvars[inventory_hostname].role != "dashboard"
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Leave Docker Swarm (dashboard node)
       docker_swarm:
         state: absent
       when: hostvars[inventory_hostname].role == "dashboard"
-      ignore_errors: yes
-
+      ignore_errors: true

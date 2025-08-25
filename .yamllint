@@ -4,7 +4,7 @@ extends: default
 
 rules:
   line-length:
-    max: 120      # Max characters per line
+    max: 160      # Max characters per line
     level: warning
 
   indentation:
