@@ -44,16 +44,16 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GHCR_PAT }}
 
       # Build intentionally vulnerable dashboard image
       - name: Build vulnerable dashboard image
         run: |
-          docker build -t ghcr.io/ashbloom12/wazuh-dashboard:latest -f docker/Dockerfile docker/
+          docker build -t ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest -f docker/Dockerfile docker/
 
       # Push dashboard image to GHCR
       - name: Push Wazuh Dashboard image
-        run: docker push ghcr.io/ashbloom12/wazuh-dashboard:latest
+        run: docker push ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest
   # ---------------- SECURITY SCAN ----------------
   scan:
     needs: build
