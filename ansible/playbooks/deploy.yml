@@ -94,6 +94,16 @@
         registry_url: ghcr.io
         username: "{{ lookup('env', 'GITHUB_ACTOR') }}"
         password: "{{ lookup('env', 'GHCR_TOKEN') }}"
+
+# Initialize Swarm + Join nodes
+- name: Initialize Docker Swarm on dashboard node
+  hosts: node1   # Dashboard node
+  become: true
+  gather_facts: false
+  roles:
+    - swarm-init   # Initializes Swarm and sets join tokens
+
+# Deploy Wazuh Stack
 - name: Deploy Wazuh Stack
   hosts: all
   become: true
@@ -102,7 +112,6 @@
     - group_vars/all.yml
     - group_vars/vault.yml    # encrypted
   roles:
-    - swarm-init    # initializes swarm and joins other nodes
     - networks      # creates overlay networks
     - secrets       # creates Swarm secrets cluster-wide (on dashboard node)
     - traefik       # deploys Traefik reverse proxy with TLS/ACME
