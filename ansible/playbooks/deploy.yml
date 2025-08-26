@@ -110,11 +110,6 @@
   roles:
     - swarm-init   # initializes Swarm and sets join tokens
 
-- name: Debug vault variables
-  debug:
-    var: wazuh_user
-  when: hostvars[inventory_hostname].role == "dashboard"
-
 # Deploy Wazuh Stack
 - name: Deploy Wazuh Stack
   hosts: all
