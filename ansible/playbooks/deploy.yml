@@ -1,50 +1,79 @@
 # deploy.yml
 
-# Install Docker on all nodes
-- name: Ensure Docker is installed
+# Ensure Docker is installed or updated on all nodes
+- name: Ensure Docker is installed or updated
   hosts: all
-  become: true
-  gather_facts: false
+  become: true  # Run tasks with sudo privileges
+  gather_facts: true
   tasks:
-    - name: Install required packages
-      apt:
+    - name: Check if Docker is installed
+      ansible.builtin.shell: docker --version
+      register: docker_installed
+      ignore_errors: true
+
+    - name: Update apt cache and upgrade packages if Docker is installed
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: dist
+      when: docker_installed.rc == 0
+
+    - name: Install prerequisite packages
+      ansible.builtin.apt:
         name:
-          - apt-transport-https
           - ca-certificates
           - curl
-          - gnupg-agent
-          - software-properties-common
+          - gnupg
+          - aptitude
         state: present
-        update_cache: true
+      when: docker_installed.rc != 0
 
-    - name: Add Docker GPG key
-      shell: |
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-      args:
-        creates: /usr/share/keyrings/docker-archive-keyring.gpg
+    - name: Create directory for Docker GPG key
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+      when: docker_installed.rc != 0
 
-    - name: Add Docker repository
-      apt_repository:
-        repo: deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable
+    - name: Download and add Docker GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+        force: true
+      when: docker_installed.rc != 0
+
+    - name: Add Docker APT repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
         state: present
+        filename: docker
+      when: docker_installed.rc != 0
 
-    - name: Install Docker CE
-      apt:
+    - name: Install Docker Engine and related packages
+      ansible.builtin.apt:
         name:
           - docker-ce
           - docker-ce-cli
           - containerd.io
-        state: latest
-        update_cache: true
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+      when: docker_installed.rc != 0
+
+    - name: Install Python Docker module
+      ansible.builtin.pip:
+        name: docker
+        executable: pip3
+      when: docker_installed.rc != 0
 
     - name: Ensure Docker service is running
-      service:
+      ansible.builtin.service:
         name: docker
         state: started
         enabled: true
 
     - name: Add user to docker group
-      user:
+      ansible.builtin.user:
         name: ubuntu
         groups: docker
         append: true
