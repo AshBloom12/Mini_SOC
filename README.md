@@ -21,9 +21,16 @@ This repo shows how to build, scan, test, and deploy Wazuh securely using **GitH
 
 ### Infrastructure
 - **VM1 (AWS)** → GitHub Actions **Self-Hosted Runner**  
-  - Dependencies: Python 3.12, Ansible 2.16.3, Docker 28.3.3, Trivy 0.65.0, ansible-lint 6.17.2, yamllint 1.33.0
-- **VM2 (AWS)** → **Docker Swarm Manager + Wazuh Manager + Dashboard + Traefik**  
-- **VM3 (AWS)** → **Docker Swarm Worker + Wazuh Indexer**    
+  - Prerequisites: 
+    - Python 3.12
+    - Ansible 2.16.3
+    - Docker 28.3.3
+    - Trivy 0.65.0
+    - ansible-lint 6.17.2
+    - yamllint 1.33.0
+    - Store the private keys for **VM2** and **VM3** in **VM1** in the `~/.ssh/` directory and set the permissions to `600` to ensure secure access
+- **VM2 (AWS)** → **Docker Swarm Manager: Wazuh Dashboard + Traefik** 
+- **VM3 (AWS)** → **Docker Swarm Worker: Wazuh Manager + Wazuh Indexer**
 
 ### Diagram
 
@@ -96,6 +103,7 @@ trivy/trivy.yaml                      # Trivy config
 trivy/.trivyignore
 .ansible-lint.yml
 .yamllint
+ansible.cfg
 README.md
 
 ```
