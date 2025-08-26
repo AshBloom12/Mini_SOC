@@ -5,6 +5,7 @@
     name: "{{ traefik_network }}"
     driver: overlay
     scope: swarm
+  when: hostvars[inventory_hostname].role == "dashboard"
 
 - name: Copy Traefik static config
   copy:
@@ -13,6 +14,7 @@
     owner: root
     group: root
     mode: '0644'
+  when: hostvars[inventory_hostname].role == "dashboard"
 
 - name: Copy Traefik dynamic config
   copy:
@@ -21,6 +23,7 @@
     owner: root
     group: root
     mode: '0644'
+  when: hostvars[inventory_hostname].role == "dashboard"
 
 - name: Ensure certs directory exists
   file:
@@ -29,6 +32,7 @@
     owner: root
     group: root
     mode: '0700'
+  when: hostvars[inventory_hostname].role == "dashboard"
 
 - name: Deploy TLS certificate (from Ansible Vault)
   copy:
@@ -37,6 +41,7 @@
     owner: root
     group: root
     mode: '0600'
+  when: hostvars[inventory_hostname].role == "dashboard"
 
 - name: Deploy TLS private key (from Ansible Vault)
   copy:
@@ -45,6 +50,7 @@
     owner: root
     group: root
     mode: '0600'
+  when: hostvars[inventory_hostname].role == "dashboard"
 
 - name: Deploy Traefik Swarm service
   docker_swarm_service:
@@ -75,3 +81,4 @@
       - source: "{{ traefik_key_file }}"
         target: /certs/key.pem
         type: bind
+  when: hostvars[inventory_hostname].role == "dashboard"
