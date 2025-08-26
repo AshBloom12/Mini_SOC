@@ -126,6 +126,7 @@ jobs:
       - name: Show nodes
         run: |
           echo "Nodes:"
+          sudo apt install yq -y
           yq '.all.children.nodes.hosts | to_entries | .[] | "\(.key) \(.value.ansible_host)"' ansible/inventories/production/hosts.yml
 
       - name: Pre-flight ping to all nodes
