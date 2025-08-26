@@ -80,8 +80,8 @@ jobs:
 
       - name: Scan Wazuh Dashboard
         run: |
-          trivy image --format table --exit-code 1 --severity CRITICAL,HIGH ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest
           trivy image --format json -o trivy-dashboard-report.json ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest
+          trivy image --format table --exit-code 1 --severity CRITICAL,HIGH ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest
           
       # Always upload reports, even if scan fails
       - name: Upload Trivy reports as artifacts
