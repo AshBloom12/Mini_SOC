@@ -69,31 +69,19 @@ jobs:
           docker pull wazuh/wazuh-indexer:4.13.0-beta2
 
       - name: Scan Wazuh Manager
-        uses: aquasecurity/trivy-action@0.32.0
-        with:
-          scan-type: image
-          image-ref: wazuh/wazuh-manager:4.13.0-beta2
-          trivy-config: trivy/trivy.yaml
-          format: json
-          output: trivy-manager-report.json
+        run: |
+          trivy image --format table wazuh/wazuh-manager:4.13.0-beta2
+          trivy image --format json -o trivy-manager-report.json wazuh/wazuh-manager:4.13.0-beta2
           
       - name: Scan Wazuh Indexer
-        uses: aquasecurity/trivy-action@0.32.0
-        with:
-          scan-type: image
-          image-ref: wazuh/wazuh-indexer:4.13.0-beta2
-          trivy-config: trivy/trivy.yaml
-          format: json
-          output: trivy-indexer-report.json
-          
+        run: |
+          trivy image --format table wazuh/wazuh-indexer:4.13.0-beta2
+          trivy image --format json -o trivy-indexer-report.json wazuh/wazuh-indexer:4.13.0-beta2
+
       - name: Scan Wazuh Dashboard
-        uses: aquasecurity/trivy-action@0.32.0
-        with:
-          scan-type: image
-          image-ref: ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest
-          trivy-config: trivy/trivy.yaml
-          format: json
-          output: trivy-dashboard-report.json
+        run: |
+          trivy image --format table ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest
+          trivy image --format json -o trivy-dashboard-report.json ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest
           
       - name: Upload Trivy reports as artifacts
         uses: actions/upload-artifact@v4
