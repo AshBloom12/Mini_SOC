@@ -135,16 +135,16 @@ jobs:
         env:
           ANSIBLE_FORCE_COLOR: "true"
         run: |
-          ansible-playbook -i ansible/inventory/hosts.yml playbooks/deploy.yml --vault-password-file <(echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}")
+          ansible-playbook -i ansible/inventories/production/hosts.yml ansible/playbooks/deploy.yml --vault-password-file <(echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}")
 
       # Post-deploy checks
       - name: Verify services in Swarm
         run: |
-          ansible -i ansible/inventory/hosts.yml node1 -m shell -a "docker service ls && docker service ps traefik --no-trunc" -b
+          ansible -i ansible/inventories/production/hosts.yml node1 -m shell -a "docker service ls && docker service ps traefik --no-trunc" -b
 
       - name: Verify Wazuh health (basic)
         run: |
-          ansible -i ansible/inventory/hosts.yml node2 -m shell -a "docker ps --format 'table {{.Names}}\t{{.Status}}' | grep -E 'wazuh|indexer|manager'" -b
+          ansible -i ansible/inventories/production/hosts.yml node2 -m shell -a "docker ps --format 'table {{.Names}}\t{{.Status}}' | grep -E 'wazuh|indexer|manager'" -b
 
   # ---------------- SELENIUM TESTS ----------------
   test:
