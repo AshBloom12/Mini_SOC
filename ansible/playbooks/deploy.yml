@@ -1,9 +1,8 @@
 # deploy.yml
 
-# Ensure Docker is installed or updated on all nodes
-- name: Ensure Docker is installed or updated
+- name: Ensure Docker is installed on all nodes
   hosts: all
-  become: true  # Run tasks with sudo privileges
+  become: true
   gather_facts: true
   vars:
     ansible_python_interpreter: /usr/bin/python3
@@ -13,11 +12,10 @@
       register: docker_installed
       ignore_errors: true
 
-    - name: Update apt cache and upgrade packages if Docker is installed
+    - name: Update apt cache
       ansible.builtin.apt:
         update_cache: true
-        upgrade: dist
-      when: docker_installed.rc == 0
+      when: docker_installed.rc != 0
 
     - name: Install prerequisite packages
       ansible.builtin.apt:
@@ -66,13 +64,11 @@
       ansible.builtin.apt:
         name: python3-pip
         state: present
-        update_cache: true
 
-    - name: Install Python Docker SDK (Debian package)
+    - name: Install Python Docker SDK
       ansible.builtin.apt:
         name: python3-docker
         state: present
-        update_cache: true
 
     - name: Ensure Docker service is running
       ansible.builtin.service:
@@ -80,7 +76,7 @@
         state: started
         enabled: true
 
-    - name: Add user to docker group
+    - name: Add ubuntu user to docker group
       ansible.builtin.user:
         name: ubuntu
         groups: docker
