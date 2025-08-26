@@ -83,12 +83,25 @@ jobs:
           trivy image --format table --exit-code 1 --severity CRITICAL,HIGH ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest
           trivy image --format json -o trivy-dashboard-report.json ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest
           
+      # Always upload reports, even if scan fails
       - name: Upload Trivy reports as artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: trivy-reports
           path: |
             trivy-dashboard-report.json
+
+      - name: Fail if CRITICAL or HIGH vulnerabilities found
+        if: always()
+        run: |
+          set -e
+          for report in trivy-dashboard-report.json; do
+            if jq -e '.Results[].Vulnerabilities[]? | select(.Severity=="CRITICAL" or .Severity=="HIGH")' "$report" > /dev/null; then
+              echo "Critical or High vulnerability detected in $report!"
+              exit 1
+            fi
+          done
   # -------------------- DEPLOY --------------------
   deploy:
     needs: scan
