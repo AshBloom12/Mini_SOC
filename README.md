@@ -140,6 +140,7 @@ Add the following GitHub Encrypted Secrets:
 * `WAZUH_API_USER`
 * `WAZUH_API_PASS`
 * `ANSIBLE_VAULT_PASSWORD`
+* `GHCR_PAT`
 
 ⚠️ Do **not** hardcode secrets (username, password, TLS certificate and TLS private key). Use `group_vars/vault.yml` (encrypted with Ansible Vault).
 
