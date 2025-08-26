@@ -1,5 +1,14 @@
 # deploy.yml
 
+# Load global variables (including vault) so all plays/roles can use them
+- hosts: all
+  vars_files:
+    - group_vars/all.yml
+    - group_vars/vault.yml   # encrypted
+  gather_facts: true
+  tasks: []
+
+# Ensure Docker is installed on all nodes
 - name: Ensure Docker is installed on all nodes
   hosts: all
   become: true
@@ -93,22 +102,19 @@
         username: "{{ lookup('env', 'GITHUB_ACTOR') }}"
         password: "{{ lookup('env', 'GHCR_TOKEN') }}"
 
-# Initialize Swarm + Join nodes
+# Initialize Docker Swarm on dashboard node
 - name: Initialize Docker Swarm on dashboard node
-  hosts: node1   # Dashboard node
+  hosts: node1
   become: true
   gather_facts: false
   roles:
-    - swarm-init   # Initializes Swarm and sets join tokens
+    - swarm-init   # initializes Swarm and sets join tokens
 
 # Deploy Wazuh Stack
 - name: Deploy Wazuh Stack
   hosts: all
   become: true
   gather_facts: true
-  vars_files:
-    - group_vars/all.yml
-    - group_vars/vault.yml    # encrypted
   roles:
     - networks      # creates overlay networks
     - secrets       # creates Swarm secrets cluster-wide (on dashboard node)
