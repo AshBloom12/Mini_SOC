@@ -65,9 +65,9 @@ jobs:
       # Pull official images (specify a version tag if needed)
       - name: Pull Wazuh images
         run: |
-          sudo docker pull wazuh/wazuh-manager:4.13.0-beta2
-          sudo docker pull wazuh/wazuh-indexer:4.13.0-beta2
-          sudo docker pull ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest
+          docker pull wazuh/wazuh-manager:4.13.0-beta2
+          docker pull wazuh/wazuh-indexer:4.13.0-beta2
+          docker pull ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest
 
       - name: Scan Wazuh Manager
         uses: aquasecurity/trivy-action@0.32.0
