@@ -65,18 +65,18 @@ jobs:
       # Pull official images (specify a version tag if needed)
       - name: Pull Wazuh images
         run: |
-          docker pull wazuh/wazuh-manager:4.13.0-beta2
-          docker pull wazuh/wazuh-indexer:4.13.0-beta2
+          docker pull wazuh/wazuh-manager:4.10.3
+          docker pull wazuh/wazuh-indexer:4.10.3
 
       - name: Scan Wazuh Manager
         run: |
-          trivy image --format table --exit-code 1 --severity CRITICAL,HIGH wazuh/wazuh-manager:4.13.0-beta2
-          trivy image --format json -o trivy-manager-report.json wazuh/wazuh-manager:4.13.0-beta2
-          
+          trivy image --format table --exit-code 1 --severity CRITICAL,HIGH wazuh/wazuh-manager:4.10.3
+          trivy image --format json -o trivy-manager-report.json wazuh/wazuh-manager:4.10.3
+
       - name: Scan Wazuh Indexer
         run: |
-          trivy image --format table --exit-code 1 --severity CRITICAL,HIGH wazuh/wazuh-indexer:4.13.0-beta2
-          trivy image --format json -o trivy-indexer-report.json wazuh/wazuh-indexer:4.13.0-beta2
+          trivy image --format table --exit-code 1 --severity CRITICAL,HIGH wazuh/wazuh-indexer:4.10.3
+          trivy image --format json -o trivy-indexer-report.json wazuh/wazuh-indexer:4.10.3
 
       - name: Scan Wazuh Dashboard
         run: |
@@ -97,11 +97,11 @@ jobs:
     runs-on: self-hosted
    
     env:
-      WAZUH_MANAGER_IMAGE: ghcr.io/myproject/wazuh-manager:latest
-      WAZUH_INDEXER_IMAGE: ghcr.io/myproject/wazuh-indexer:latest
+      WAZUH_MANAGER_IMAGE: wazuh/wazuh-manager:4.10.3
+      WAZUH_INDEXER_IMAGE: wazuh/wazuh-indexer:4.10.3
       WAZUH_DASHBOARD_IMAGE: ghcr.io/myproject/wazuh-dashboard:latest
       ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
-      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GHCR_TOKEN: ${{ secrets.GHCR_PAT }}
       GITHUB_ACTOR: ${{ github.actor }}
 
     steps:
