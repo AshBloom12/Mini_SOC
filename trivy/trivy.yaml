@@ -1,7 +1,7 @@
 # trivy/trivy.yaml
 version: "2"
 vulnerability:
-  # Fail CI if CRITICAL or HIGH vulnerabilities are found
+  # Fail CI if CRITICAL or HIGH vulnerabilities are found if we want to test manually
   severity:
     - CRITICAL
     - HIGH
