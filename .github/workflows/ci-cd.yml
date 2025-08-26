@@ -117,34 +117,36 @@ jobs:
       ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
       GHCR_TOKEN: ${{ secrets.GHCR_PAT }}
       GITHUB_ACTOR: ${{ github.actor }}
+      ANSIBLE_FORCE_COLOR: true
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Go to repo root
+        run: cd Mini_SOC/Mini_SOC
+
       - name: Show inventory summary
         run: |
           echo "Inventory:"
-          cat Mini_SOC/ansible/inventories/production/hosts.yml || true
+          cat ansible/inventories/production/hosts.yml || true
 
       - name: Pre-flight ping to all nodes
         run: |
-          ansible -i Mini_SOC/ansible/inventories/production/hosts.yml all -m ping
+          ansible all -m ping
 
       - name: Run Ansible deploy playbook
-        env:
-          ANSIBLE_FORCE_COLOR: "true"
         run: |
-          ansible-playbook -i Mini_SOC/ansible/inventories/production/hosts.yml ansible/playbooks/deploy.yml --vault-password-file <(echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}")
+          ansible-playbook ansible/playbooks/deploy.yml --vault-password-file <(echo "${ANSIBLE_VAULT_PASSWORD}")
 
       # Post-deploy checks
       - name: Verify services in Swarm
         run: |
-          ansible -i Mini_SOC/ansible/inventories/production/hosts.yml node1 -m shell -a "docker service ls && docker service ps traefik --no-trunc" -b
+          ansible node1 -m shell -a "docker service ls && docker service ps traefik --no-trunc" -b
 
       - name: Verify Wazuh health (basic)
         run: |
-          ansible -i Mini_SOC/ansible/inventories/production/hosts.yml node2 -m shell -a "docker ps --format 'table {{.Names}}\t{{.Status}}' | grep -E 'wazuh|indexer|manager'" -b
+          ansible node2 -m shell -a "docker ps --format 'table {{.Names}}\t{{.Status}}' | grep -E 'wazuh|indexer|manager'" -b
 
   # ---------------- SELENIUM TESTS ----------------
   test:
