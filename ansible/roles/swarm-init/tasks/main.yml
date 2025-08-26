@@ -6,16 +6,27 @@
   when: hostvars[inventory_hostname].role == "dashboard"
   register: swarm_init
 
-# Save manager join token (for other manager/indexer nodes)
-- name: Set fact for manager join token
+# Save manager/worker tokens globally
+- name: Save join tokens globally
   set_fact:
     manager_join_token: "{{ swarm_init.swarm_facts.JoinTokens.Manager }}"
+    worker_join_token: "{{ swarm_init.swarm_facts.JoinTokens.Worker }}"
   when: hostvars[inventory_hostname].role == "dashboard"
+  delegate_to: localhost
+  run_once: true
 
 # Join manager+indexer nodes to the swarm
 - name: Join manager+indexer nodes to swarm
   docker_swarm:
     state: join
-    join_token: "{{ hostvars[groups['nodes'][0]].manager_join_token }}"
+    join_token: "{{ manager_join_token }}"
     remote_addrs: ["{{ hostvars[groups['nodes'][0]].ansible_host }}"]
   when: hostvars[inventory_hostname].role == "manager"
+
+# Join worker nodes to the swarm
+- name: Join worker nodes to swarm
+  docker_swarm:
+    state: join
+    join_token: "{{ worker_join_token }}"
+    remote_addrs: ["{{ hostvars[groups['nodes'][0]].ansible_host }}"]
+  when: hostvars[inventory_hostname].role == "worker"
