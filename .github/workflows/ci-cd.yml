@@ -92,12 +92,14 @@ jobs:
           name: trivy-reports
           path: |
             trivy-dashboard-report.json
+            trivy-indexer-report.json
+            trivy-manager-report.json
 
       - name: Fail if CRITICAL or HIGH vulnerabilities found
         if: always()
         run: |
           set -e
-          for report in trivy-dashboard-report.json; do
+          for report in trivy-manager-report.json trivy-indexer-report.json trivy-dashboard-report.json; do
             if jq -e '.Results[].Vulnerabilities[]? | select(.Severity=="CRITICAL" or .Severity=="HIGH")' "$report" > /dev/null; then
               echo "Critical or High vulnerability detected in $report!"
               exit 1
