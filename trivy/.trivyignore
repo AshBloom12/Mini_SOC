@@ -1,1 +1,5 @@
 # Here are known CVEs that we accept (e.g., false positives, vendor not fixing, non-exploitable in our environment)
+CVE-2024-45337
+CVE-2024-24790
+CVE-2023-24540
+CVE-2022-23806
