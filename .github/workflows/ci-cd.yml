@@ -67,7 +67,6 @@ jobs:
         run: |
           docker pull wazuh/wazuh-manager:4.13.0-beta2
           docker pull wazuh/wazuh-indexer:4.13.0-beta2
-          docker pull ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest
 
       - name: Scan Wazuh Manager
         uses: aquasecurity/trivy-action@0.32.0
@@ -91,7 +90,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.32.0
         with:
           scan-type: image
-          image-ref: ghcr.io/myproject/wazuh-dashboard:latest
+          image-ref: ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest
           trivy-config: trivy/trivy.yaml
           format: json
           output: trivy-dashboard-report.json
