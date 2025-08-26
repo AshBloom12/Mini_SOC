@@ -5,6 +5,8 @@
   hosts: all
   become: true  # Run tasks with sudo privileges
   gather_facts: true
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
   tasks:
     - name: Check if Docker is installed
       ansible.builtin.shell: docker --version
@@ -71,6 +73,13 @@
         name: docker
         executable: /usr/bin/pip3
       when: docker_installed.rc != 0
+
+    - name: Verify docker SDK installed
+      hosts: all
+      gather_facts: false
+      tasks:
+        - name: Check docker module
+          command: /usr/bin/python3 -c "import docker; print(docker.__version__)"
 
     - name: Ensure Docker service is running
       ansible.builtin.service:
