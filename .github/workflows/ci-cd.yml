@@ -123,33 +123,28 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Show inventory summary
-        working-directory: /home/ubuntu/actions-runner/_work/Mini_SOC
         run: |
           echo "Inventory:"
-          cat ansible/inventories/production/hosts.yml || true
+          cat Mini_SOC/ansible/inventories/production/hosts.yml || true
 
       - name: Pre-flight ping to all nodes
-        working-directory: /home/ubuntu/actions-runner/_work/Mini_SOC
         run: |
-          ansible -i ansible/inventories/production/hosts.yml all -m ping
+          ansible -i Mini_SOC/ansible/inventories/production/hosts.yml all -m ping
 
       - name: Run Ansible deploy playbook
         env:
           ANSIBLE_FORCE_COLOR: "true"
-        working-directory: /home/ubuntu/actions-runner/_work/Mini_SOC
         run: |
-          ansible-playbook -i ansible/inventories/production/hosts.yml ansible/playbooks/deploy.yml --vault-password-file <(echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}")
+          ansible-playbook -i Mini_SOC/ansible/inventories/production/hosts.yml ansible/playbooks/deploy.yml --vault-password-file <(echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}")
 
       # Post-deploy checks
       - name: Verify services in Swarm
-        working-directory: /home/ubuntu/actions-runner/_work/Mini_SOC
         run: |
-          ansible -i ansible/inventories/production/hosts.yml node1 -m shell -a "docker service ls && docker service ps traefik --no-trunc" -b
+          ansible -i Mini_SOC/ansible/inventories/production/hosts.yml node1 -m shell -a "docker service ls && docker service ps traefik --no-trunc" -b
 
       - name: Verify Wazuh health (basic)
-        working-directory: /home/ubuntu/actions-runner/_work/Mini_SOC
         run: |
-          ansible -i ansible/inventories/production/hosts.yml node2 -m shell -a "docker ps --format 'table {{.Names}}\t{{.Status}}' | grep -E 'wazuh|indexer|manager'" -b
+          ansible -i Mini_SOC/ansible/inventories/production/hosts.yml node2 -m shell -a "docker ps --format 'table {{.Names}}\t{{.Status}}' | grep -E 'wazuh|indexer|manager'" -b
 
   # ---------------- SELENIUM TESTS ----------------
   test:
