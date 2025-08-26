@@ -68,14 +68,12 @@
         state: present
         update_cache: true
 
-    - name: Install Python Docker module
-      ansible.builtin.pip:
-        name: docker
-        executable: /usr/bin/pip3
+    - name: Install Python Docker SDK (Debian package)
+      ansible.builtin.apt:
+        name: python3-docker
+        state: present
+        update_cache: true
       when: docker_installed.rc != 0
-
-    - name: Verify Docker SDK installed
-      command: /usr/bin/python3 -c "import docker; print(docker.__version__)"
 
     - name: Ensure Docker service is running
       ansible.builtin.service:
