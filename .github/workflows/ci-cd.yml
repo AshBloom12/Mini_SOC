@@ -81,8 +81,8 @@ jobs:
 
       - name: Scan Wazuh Dashboard
         run: |
-          trivy image --format json -o trivy-dashboard-report.json wazuh-dashboard:4.13.0-beta2
-          trivy image --format table wazuh-dashboard:4.13.0-beta2
+          trivy image --format json -o trivy-dashboard-report.json wazuh/wazuh-dashboard:4.13.0-beta2
+          trivy image --format table wazuh/wazuh-dashboard:4.13.0-beta2
           
       # Always upload reports, even if scan fails
       - name: Upload Trivy reports as artifacts
