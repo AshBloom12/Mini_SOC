@@ -53,7 +53,7 @@ jobs:
 
       # Push dashboard image to GHCR
       - name: Push Wazuh Dashboard image
-        run: sudo docker push ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest
+        run: docker push ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest
   # ---------------- SECURITY SCAN ----------------
   scan:
     needs: build
