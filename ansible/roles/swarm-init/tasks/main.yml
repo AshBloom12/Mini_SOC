@@ -22,13 +22,34 @@
   when: hostvars[inventory_hostname].role == "worker"
 
 # Remove old/duplicate nodes on manager (except current Ready workers)
-- name: Remove all Down or duplicate worker nodes, keep only one Ready node per hostname
-  shell: >
-    docker node ls --format '{{"{{.ID}}"}} {{"{{.Hostname}}"}} {{"{{.Status}}"}}' |
-    awk '{count[$2]++; if($3=="Down" || count[$2]>1){print $1}}' |
+- name: Remove all nodes with ambiguous hostnames except Ready ones
+  shell: |
+    docker node ls --format '{{'{{.ID}}'}} {{'{{.Hostname}}'}} {{'{{.Status}}'}}' |
+    awk '
+      {nodes[$2][$3]=$1}
+      END {
+        for (host in nodes) {
+          # Keep the Ready node, remove all others
+          for (status in nodes[host]) {
+            if (status != "Ready") {
+              print nodes[host][status]
+            }
+          }
+        }
+      }' |
     while read NODE_ID; do
       docker node rm "$NODE_ID" || true
     done
+  delegate_to: node1
+  run_once: true
+
+- name: Verify only one node per hostname remains
+  shell: |
+    count=$(docker node ls --format '{{'{{.Hostname}}'}}' | sort | uniq -d)
+    if [ -n "$count" ]; then
+      echo "Duplicate nodes still exist: $count" >&2
+      exit 1
+    fi
   delegate_to: node1
   run_once: true
 
