@@ -108,8 +108,8 @@
   become: true
   gather_facts: true
   vars_files:
-    - ../group_vars/all.yml
-    - ../group_vars/vault.yml    # encrypted vault file
+    - group_vars/all.yml
+    - group_vars/vault.yml    # encrypted vault file
   tasks:
     - name: Debug vault variables
       debug:
