@@ -72,7 +72,7 @@
         target_port: 443
     placement:
       constraints:
-        - node.role == manager
+        - node.role == dashboard
     networks:
       - name: "{{ traefik_network }}"
     mounts:
