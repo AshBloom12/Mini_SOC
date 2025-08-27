@@ -37,7 +37,7 @@
       sleep 5
     done
     exit 1
-  delegate_to: "{{ groups['nodes'] | selectattr('role','equalto','dashboard') | list | first }}"
+  delegate_to: "node1"   # explicitly the manager node
   when: hostvars[inventory_hostname].role == "worker"
 
 # Apply labels to all nodes
@@ -46,4 +46,4 @@
     hostname: "{{ hostvars[inventory_hostname].ansible_host }}"  # must match Swarm node hostname
     labels:
       role: "{{ hostvars[inventory_hostname].role }}"
-  delegate_to: "{{ groups['nodes'] | selectattr('role','equalto','dashboard') | list | first }}"
+  delegate_to: "node1"   # explicitly the manager node
