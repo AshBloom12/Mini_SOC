@@ -96,27 +96,27 @@
   run_once: true
 
 # Force Traefik to restart and clear old tasks
-- name: Force Traefik to restart and clear old tasks
-  shell: |
-    {% raw %}
-    if docker service ls --format '{{.Name}}' | grep -q '^traefik$'; then
-      docker service update --force traefik
-    else
-      echo "Traefik service not found, skipping update"
-    fi
-    {% endraw %}
-  delegate_to: node1
-  run_once: true
+#- name: Force Traefik to restart and clear old tasks
+#  shell: |
+#    {% raw %}
+#    if docker service ls --format '{{.Name}}' | grep -q '^traefik$'; then
+#      docker service update --force traefik
+#    else
+#      echo "Traefik service not found, skipping update"
+#    fi
+#    {% endraw %}
+#  delegate_to: node1
+#  run_once: true
 
 # Ensure Traefik is running with 1 replica
-- name: Ensure Traefik is running with 1 replica
-  shell: |
-    {% raw %}
-    if docker service ls --format '{{.Name}}' | grep -q '^traefik$'; then
-      docker service scale traefik=1
-    else
-      echo "Traefik service not found, skipping scale"
-    fi
-    {% endraw %}
-  delegate_to: node1
-  run_once: true
+#- name: Ensure Traefik is running with 1 replica
+#  shell: |
+#    {% raw %}
+#    if docker service ls --format '{{.Name}}' | grep -q '^traefik$'; then
+#      docker service scale traefik=1
+#    else
+#      echo "Traefik service not found, skipping scale"
+#    fi
+#    {% endraw %}
+#  delegate_to: node1
+#  run_once: true
