@@ -107,10 +107,6 @@
   hosts: all
   become: true
   gather_facts: true
-  tasks:
-    - name: Debug vault variables
-      debug:
-        var: wazuh_user
   roles:
     - networks      # creates overlay networks
     - secrets       # creates Swarm secrets cluster-wide (on dashboard node)
