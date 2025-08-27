@@ -135,7 +135,7 @@ jobs:
 
       - name: Run Ansible deploy playbook
         run: |
-          ansible-playbook ansible/playbooks/deploy.yml --vault-password-file <(echo "${ANSIBLE_VAULT_PASSWORD}")
+          ansible-playbook ansible/playbooks/deploy.yml --vault-password-file <(echo ${{ secrets.ANSIBLE_VAULT_PASSWORD }})
 
       # Post-deploy checks
       - name: Verify services in Swarm
