@@ -142,7 +142,7 @@ jobs:
 
       - name: Run Ansible deploy playbook
         run: |
-          ansible-playbook ansible/playbooks/deploy.yml --vault-password-file <(echo "$ANSIBLE_VAULT_PASSWORD")
+          ansible-playbook ansible/playbooks/deploy.yml --vault-password-file .vault_pass
         
       - name: Cleanup vault password
         run: rm -f .vault_pass
