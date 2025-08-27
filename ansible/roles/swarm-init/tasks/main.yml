@@ -25,25 +25,25 @@
 - name: Join worker nodes to swarm
   docker_swarm:
     state: join
-    join_token: "{{ hostvars['node1'].swarm_init.swarm_facts.JoinTokens.Worker }}"
+    join_token: "{{ hostvars['localhost'].worker_join_token }}"
     remote_addrs: ["{{ hostvars['node1'].ansible_host }}"]
   when: hostvars[inventory_hostname].role == "worker"
 
 # Wait for worker nodes to appear in the manager
 - name: Wait for workers to register in Swarm
   shell: |
-    for i in $(seq 1 20); do
-      docker node ls | grep -q "{{ inventory_hostname }}" && exit 0
+    for i in $(seq 1 30); do
+      docker node ls --format '{{.Hostname}}' | grep -q "{{ ansible_hostname }}" && exit 0
       sleep 5
     done
     exit 1
-  delegate_to: "node1"   # explicitly the manager node
+  delegate_to: "node1"
   when: hostvars[inventory_hostname].role == "worker"
 
 # Apply labels to all nodes
 - name: Label nodes according to their role
   docker_node:
-    hostname: "{{ hostvars[inventory_hostname].ansible_host }}"  # must match Swarm node hostname
+    hostname: "{{ ansible_hostname }}"
     labels:
       role: "{{ hostvars[inventory_hostname].role }}"
-  delegate_to: "node1"   # explicitly the manager node
+  delegate_to: "node1"
