@@ -14,6 +14,12 @@
   when: hostvars[inventory_hostname].role == "dashboard"
   delegate_to: localhost
 
+# Ensure workers leave any existing swarm before joining
+- name: Ensure workers leave any existing swarm before joining
+  docker_swarm:
+    state: absent
+  when: hostvars[inventory_hostname].role == "worker"
+
 # Join worker nodes to the swarm
 - name: Join worker nodes to swarm
   docker_swarm:
