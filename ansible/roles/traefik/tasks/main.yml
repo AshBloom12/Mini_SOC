@@ -70,8 +70,9 @@
         target_port: 80
       - published_port: 443
         target_port: 443
-    constraints:
-      - node.role == manager
+    placement:
+      constraints:
+        - node.role == manager
     networks:
       - name: "{{ traefik_network }}"
     mounts:
