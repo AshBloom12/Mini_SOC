@@ -72,11 +72,13 @@
 # Reset Traefik after the swarm is ready
 - name: Reset Traefik service to remove old failed tasks
   shell: |
+    {% raw %}
     if docker service ls --format '{{.Name}}' | grep -q '^traefik$'; then
       docker service scale traefik=0
       docker service scale traefik=1
     else
       echo "Traefik service not found, skipping reset"
     fi
+    {% endraw %}
   delegate_to: node1
   run_once: true
