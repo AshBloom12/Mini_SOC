@@ -130,7 +130,10 @@ jobs:
 
       - name: Pre-flight ping to all nodes
         run: |
-          ansible all -m ping
+          echo -n "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
+          ansible all -m ping --vault-password-file /tmp/vault_pass.txt
+          rm -f /tmp/vault_pass.txt
+#          ansible all -m ping
 
       - name: Run Ansible deploy playbook
         env:
