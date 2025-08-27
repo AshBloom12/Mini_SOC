@@ -132,6 +132,10 @@ jobs:
       - name: Pre-flight ping to all nodes
         run: |
           ansible all -m ping
+        
+      - name: DEBUG
+        run: |
+          echo "$ANSIBLE_VAULT_PASSWORD" | wc -c
 
       - name: Run Ansible deploy playbook
         run: |
