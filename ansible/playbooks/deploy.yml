@@ -1,12 +1,12 @@
 # deploy.yml
 
 # Load global variables (including vault) so all plays/roles can use them
-#- hosts: all
-#  vars_files:
-#    - group_vars/all.yml
-#    - group_vars/vault.yml   # encrypted
-#  gather_facts: true
-#  tasks: []
+- hosts: all
+  vars_files:
+    - ../group_vars/all.yml
+    - ../group_vars/vault.yml   # encrypted
+  gather_facts: true
+  tasks: []
 
 # Ensure Docker is installed on all nodes
 - name: Ensure Docker is installed on all nodes
@@ -115,8 +115,8 @@
   hosts: all
   become: true
   gather_facts: true
-  vars_files:
-    - ../group_vars/vault.yml  # vault file explicitly loaded
+#  vars_files:
+#    - ../group_vars/vault.yml  # vault file explicitly loaded
   roles:
     - networks      # creates overlay networks
     - secrets       # creates Swarm secrets cluster-wide (on dashboard node)
