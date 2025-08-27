@@ -22,4 +22,3 @@
     remote_addrs:
       - "{{ hostvars['node1'].ansible_host }}"
   when: hostvars[inventory_hostname].role == "worker"
-
