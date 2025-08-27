@@ -1,11 +1,20 @@
 - name: Deploy Wazuh stack on Swarm manager
   block:
+
+    # Render the Jinja2 Docker Compose template to a temporary file
+    - name: Render Docker Compose template for Wazuh stack
+      template:
+        src: docker-compose.yml.j2
+        dest: /tmp/docker-compose.yml
+      when: hostvars[inventory_hostname].role == "dashboard"
+
+    # Deploy or update the Wazuh stack using the rendered Compose file
     - name: Deploy or update Wazuh stack
       docker_stack:
         name: "{{ swarm_stack_name }}"
         state: present
         compose:
-          - "{{ playbook_dir }}/roles/deploy-stack/templates/docker-compose.yml.j2"
+          - /tmp/docker-compose.yml
         prune: true
       when: hostvars[inventory_hostname].role == "dashboard"
       register: deploy_result
@@ -18,3 +27,11 @@
             state: absent
         - fail:
             msg: "Wazuh stack deployment failed on {{ inventory_hostname }}. Check Swarm logs."
+
+  always:
+    # Cleanup temporary rendered file
+    - name: Remove temporary Docker Compose file
+      file:
+        path: /tmp/docker-compose.yml
+        state: absent
+      when: hostvars[inventory_hostname].role == "dashboard"

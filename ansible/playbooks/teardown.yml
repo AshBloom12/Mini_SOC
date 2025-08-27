@@ -2,9 +2,6 @@
   hosts: all
   become: true
   gather_facts: true
-  vars_files:
-    - group_vars/all.yml
-    - group_vars/vault.yml    # encrypted, needed if we want to remove secrets
   tasks:
 
     - name: Remove Wazuh stack
