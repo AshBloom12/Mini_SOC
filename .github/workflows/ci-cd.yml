@@ -150,7 +150,9 @@ jobs:
 
       - name: Verify Wazuh health (basic)
         run: |
-          ansible node2 -m shell -a "docker ps --format 'table {{.Names}}\t{{.Status}}' | grep -E 'wazuh|indexer|manager'" -b
+          echo -n "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
+          ansible node2 -m shell -a "docker ps --format 'table {{.Names}}\t{{.Status}}' | grep -E 'wazuh|indexer|manager'" -b --vault-password-file /tmp/vault_pass.txt
+          rm -f /tmp/vault_pass.txt
 
   # ---------------- SELENIUM TESTS ----------------
   test:
