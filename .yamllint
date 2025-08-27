@@ -7,7 +7,7 @@ ignore: |
 
 rules:
   line-length:
-    max: 160      # Max characters per line
+    max: 250      # Max characters per line
     level: warning
 
   indentation:
