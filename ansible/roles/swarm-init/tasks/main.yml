@@ -6,7 +6,7 @@
   when: hostvars[inventory_hostname].role == "dashboard"
   register: swarm_init
 
-# Save Swarm join tokens globally
+# Save Swarm join tokens globally (run once)
 - name: Save Swarm join tokens
   set_fact:
     manager_join_token: "{{ swarm_init.swarm_facts.JoinTokens.Manager }}"
@@ -21,10 +21,16 @@
     force: true
   when: hostvars[inventory_hostname].role == "worker"
 
-- name: Remove old/down duplicate worker nodes
+# Remove old/duplicate nodes on manager (except current Ready workers)
+- name: Remove old/down duplicate nodes
   shell: |
-    for node in $(docker node ls --format '{{"{{.ID}}"}} {{"{{.Status}}"}}' | awk '$2=="Down"{print $1}'); do
-      docker node rm "$node" || true
+    for node in $(docker node ls --format '{{"{{.ID}}"}} {{"{{.Hostname}}"}} {{"{{.Status}}"}}'); do
+      NODE_ID=$(echo $node | awk '{print $1}')
+      NODE_HOST=$(echo $node | awk '{print $2}')
+      NODE_STATUS=$(echo $node | awk '{print $3}')
+      if [[ "$NODE_STATUS" == "Down" ]] || [[ "$NODE_HOST" != "{{ ansible_hostname }}" && "$NODE_STATUS" == "Ready" ]]; then
+        docker node rm "$NODE_ID" || true
+      fi
     done
   delegate_to: node1
   run_once: true
