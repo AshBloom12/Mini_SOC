@@ -22,23 +22,21 @@
   when: hostvars[inventory_hostname].role == "worker"
 
 # Remove old/duplicate nodes on manager (except current Ready workers)
-- name: Remove all nodes except the first Ready node per hostname
+- name: Remove duplicate swarm nodes aggressively
   shell: |
-    docker node ls --format '{{"{{.ID}} {{.Hostname}} {{.Status}}"}}' |
+    docker node ls --format '{{"{{.ID}} {{.Hostname}} {{.Status}}"}}' | sort -k2,2 -u -s |
     awk '
-      {nodes[$2][$3]=$1}
-      END {
-        for (host in nodes) {
-          for (status in nodes[host]) {
-            if (status != "Ready") print nodes[host][status]
-          }
+      {
+        if (!seen[$2]) {
+          seen[$2]=$1
+        } else {
+          print $1
         }
       }' |
     while read NODE_ID; do
-      docker node rm "$NODE_ID" || true
+      echo "Removing duplicate node $NODE_ID" >&2
+      docker node rm -f "$NODE_ID" || true
     done
-
-    # Remove remaining duplicates if any
     dups=$(docker node ls --format '{{"{{.Hostname}}"}}' | sort | uniq -d)
     if [ -n "$dups" ]; then
       echo "Still have duplicate nodes: $dups" >&2
