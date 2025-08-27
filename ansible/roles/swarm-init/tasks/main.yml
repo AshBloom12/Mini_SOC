@@ -22,35 +22,30 @@
   when: hostvars[inventory_hostname].role == "worker"
 
 # Remove old/duplicate nodes on manager (except current Ready workers)
-- name: Remove duplicate swarm nodes aggressively
+- name: Remove duplicate swarm nodes (keep first Ready, remove Down)
   shell: |
-    docker node ls --format '{{"{{.ID}} {{.Hostname}} {{.Status}}"}}' | sort -k2,2 -u -s |
-    awk '
-      {
-        if (!seen[$2]) {
-          seen[$2]=$1
-        } else {
-          print $1
-        }
-      }' |
-    while read NODE_ID; do
-      echo "Removing duplicate node $NODE_ID" >&2
-      docker node rm -f "$NODE_ID" || true
+    # For each hostname with duplicates
+    for host in $(docker node ls --format '{{"{{.Hostname}}"}}' | sort | uniq -d); do
+      echo "Checking duplicates for $host" >&2
+      # List all node IDs for that hostname
+      IDS=$(docker node ls --format '{{"{{.ID}} {{.Hostname}} {{.Status}}"}}' | grep " $host" | awk '{print $1":"$3}')
+      KEEP=""
+      for entry in $IDS; do
+        ID=$(echo $entry | cut -d: -f1)
+        STATUS=$(echo $entry | cut -d: -f2)
+        if [ "$STATUS" = "Ready" ] && [ -z "$KEEP" ]; then
+          KEEP=$ID
+        else
+          echo "Removing duplicate node $ID for $host (status=$STATUS)" >&2
+          docker node rm -f "$ID" || true
+        fi
+      done
     done
+
+    # Verify no more duplicates
     dups=$(docker node ls --format '{{"{{.Hostname}}"}}' | sort | uniq -d)
     if [ -n "$dups" ]; then
       echo "Still have duplicate nodes: $dups" >&2
-      exit 1
-    fi
-  delegate_to: node1
-  run_once: true
-
-# Verify only one node per hostname remains (before labeling)
-- name: Verify only one node per hostname remains
-  shell: |
-    count=$(docker node ls --format '{{'{{.Hostname}}'}}' | sort | uniq -d)
-    if [ -n "$count" ]; then
-      echo "Duplicate nodes still exist: $count" >&2
       exit 1
     fi
   delegate_to: node1
