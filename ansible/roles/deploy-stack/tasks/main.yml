@@ -18,7 +18,7 @@
         prune: true
       when: hostvars[inventory_hostname].role == "dashboard"
       register: deploy_result
-      ignore_errors: true   # <-- allow rescue block to handle failure
+      ignore_errors: true   # allow rescue block to handle failure
 
   rescue:
     - name: Rollback and fail if stack deployment failed
@@ -30,7 +30,7 @@
             msg: |
               Wazuh stack deployment failed on {{ inventory_hostname }}.
               Docker Stack error output:
-              {{ deploy_result.stderr }}  # <-- display detailed error
+              {{ deploy_result.stderr }}
 
   always:
     # Cleanup temporary rendered file
