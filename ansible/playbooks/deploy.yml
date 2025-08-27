@@ -115,6 +115,7 @@
   become: true
   gather_facts: true
   roles:
+    - swarm_init
     - networks      # creates overlay networks
     - secrets       # creates Swarm secrets cluster-wide (on dashboard node)
     - traefik       # deploys Traefik reverse proxy with TLS/ACME
