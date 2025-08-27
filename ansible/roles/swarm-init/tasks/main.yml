@@ -14,20 +14,19 @@
   when: hostvars[inventory_hostname].role == "dashboard"
   delegate_to: localhost
 
-# Ensure worker nodes leave any existing swarm
-- name: Make worker nodes leave any existing swarm
+# Ensure workers leave any existing swarm before joining
+- name: Ensure worker nodes leave any existing swarm
   docker_swarm:
     state: absent
-    force: yes
+    force: true
   when: hostvars[inventory_hostname].role == "worker"
 
 # Join worker nodes to the swarm
 - name: Join worker nodes to swarm
   docker_swarm:
     state: join
-    join_token: "{{ hostvars['localhost'].worker_join_token }}"
-    remote_addrs:
-      - "{{ hostvars[groups['nodes'] | selectattr('role','equalto','dashboard') | list | first].ansible_host }}"
+    join_token: "{{ hostvars['node1'].swarm_init.swarm_facts.JoinTokens.Worker }}"
+    remote_addrs: ["{{ hostvars['node1'].ansible_host }}"]
   when: hostvars[inventory_hostname].role == "worker"
 
 # Wait for worker nodes to appear in the manager
