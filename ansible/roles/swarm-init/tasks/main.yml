@@ -1,31 +1,23 @@
 # Initialize Docker Swarm on the dashboard node (manager)
-- name: Initialize Docker Swarm on dashboard node
-  hosts: nodes
-  become: true
-  tasks:
-    - name: Initialize Swarm (manager)
-      docker_swarm:
-        state: present
-        advertise_addr: "{{ ansible_host }}"
-      when: hostvars[inventory_hostname].role == "dashboard"
-      register: swarm_init
+- name: Initialize Swarm (manager)
+  docker_swarm:
+    state: present
+    advertise_addr: "{{ ansible_host }}"
+  when: hostvars[inventory_hostname].role == "dashboard"
+  register: swarm_init
 
-    - name: Save join tokens globally
-      set_fact:
-        manager_join_token: "{{ swarm_init.swarm_facts.JoinTokens.Manager }}"
-        worker_join_token: "{{ swarm_init.swarm_facts.JoinTokens.Worker }}"
-      when: hostvars[inventory_hostname].role == "dashboard"
-      delegate_to: localhost
+- name: Save join tokens globally
+  set_fact:
+    manager_join_token: "{{ swarm_init.swarm_facts.JoinTokens.Manager }}"
+    worker_join_token: "{{ swarm_init.swarm_facts.JoinTokens.Worker }}"
+  when: hostvars[inventory_hostname].role == "dashboard"
+  delegate_to: localhost
 
 # Join all worker nodes to Swarm
 - name: Join worker nodes to swarm
-  hosts: nodes
-  become: true
-  tasks:
-    - name: Join worker nodes to swarm
-      docker_swarm:
-        state: join
-        join_token: "{{ hostvars['localhost'].worker_join_token }}"
-        remote_addrs:
-          - "{{ hostvars['node1'].ansible_host }}"
-      when: hostvars[inventory_hostname].role == "worker"
+  docker_swarm:
+    state: join
+    join_token: "{{ hostvars['localhost'].worker_join_token }}"
+    remote_addrs:
+      - "{{ hostvars['node1'].ansible_host }}"
+  when: hostvars[inventory_hostname].role == "worker"

@@ -37,7 +37,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.labels.role == worker
+          - node.labels.role == worker  # Wazuh manager goes to worker (node2)
       update_config:
         parallelism: 1
         delay: 10s
@@ -54,7 +54,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.labels.role == worker
+          - node.labels.role == worker  # Wazuh indexer goes to worker (node2)
       update_config:
         parallelism: 1
         delay: 10s
@@ -83,7 +83,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.labels.role == dashboard
+          - node.labels.role == dashboard  # Dashboard goes to manager (node1)
       update_config:
         parallelism: 1
         delay: 10s
