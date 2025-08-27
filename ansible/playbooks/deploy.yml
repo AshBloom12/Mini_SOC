@@ -115,6 +115,8 @@
   hosts: all
   become: true
   gather_facts: true
+  vars_files:
+    - group_vars/vault.yml  # vault file explicitly loaded
   roles:
     - networks      # creates overlay networks
     - secrets       # creates Swarm secrets cluster-wide (on dashboard node)
