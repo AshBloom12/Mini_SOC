@@ -79,8 +79,8 @@ flowchart LR
 .github/workflows/ci-cd.yml           # CI/CD pipeline
 ansible/
 ├─ inventories/production/
+│   ├─ group\_vars/all/all.yml
 │   ├─ group\_vars/all/vault.yml
-│   ├─ group\_vars/all.yml
 │   └─ hosts.yml
 ├─ playbooks/deploy.yml
 ├─ playbooks/teardown.yml
