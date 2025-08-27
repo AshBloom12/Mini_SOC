@@ -114,6 +114,7 @@ jobs:
       WAZUH_MANAGER_IMAGE: wazuh/wazuh-manager:4.13.0-beta2
       WAZUH_INDEXER_IMAGE: wazuh/wazuh-indexer:4.13.0-beta2
       WAZUH_DASHBOARD_IMAGE: wazuh/wazuh-dashboard:4.13.0-beta2
+      ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
       GHCR_TOKEN: ${{ secrets.GHCR_PAT }}
       GITHUB_ACTOR: ${{ github.actor }}
       ANSIBLE_FORCE_COLOR: true
@@ -133,11 +134,8 @@ jobs:
           echo -n "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
           ansible all -m ping --vault-password-file /tmp/vault_pass.txt
           rm -f /tmp/vault_pass.txt
-#          ansible all -m ping
 
       - name: Run Ansible deploy playbook
-        env:
-          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
           echo -n "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
           ansible-playbook ansible/playbooks/deploy.yml --vault-password-file /tmp/vault_pass.txt
