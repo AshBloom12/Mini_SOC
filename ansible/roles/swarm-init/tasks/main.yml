@@ -21,7 +21,7 @@
     force: true
   when: hostvars[inventory_hostname].role == "worker"
 
-# Join worker nodes to the swarm
+# Join worker nodes to swarm
 - name: Join worker nodes to swarm
   docker_swarm:
     state: join
@@ -29,7 +29,7 @@
     remote_addrs: ["{{ hostvars['node1'].ansible_host }}"]
   when: hostvars[inventory_hostname].role == "worker"
 
-# Wait for worker nodes to appear in the manager
+# Wait for workers to appear in Swarm
 - name: Wait for workers to register in Swarm
   shell: |
     for i in $(seq 1 30); do
@@ -40,7 +40,7 @@
   delegate_to: "node1"
   when: hostvars[inventory_hostname].role == "worker"
 
-# Apply labels to all nodes
+# Label nodes
 - name: Label nodes according to their role
   docker_node:
     hostname: "{{ ansible_hostname }}"
