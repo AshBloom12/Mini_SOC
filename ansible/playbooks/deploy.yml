@@ -101,21 +101,13 @@
         username: "{{ lookup('env', 'GITHUB_ACTOR') }}"
         password: "{{ lookup('env', 'GHCR_TOKEN') }}"
 
-# Initialize Docker Swarm on dashboard node
-- name: Initialize Docker Swarm on dashboard node
-  hosts: node1
-  become: true
-  gather_facts: false
-  roles:
-    - swarm-init   # initializes Swarm and sets join tokens
-
 # Deploy Wazuh Stack
 - name: Deploy Wazuh Stack
   hosts: all
   become: true
   gather_facts: true
   roles:
-    - swarm_init
+    - swarm-init   # initializes Swarm and sets join tokens
     - networks      # creates overlay networks
     - secrets       # creates Swarm secrets cluster-wide (on dashboard node)
     - traefik       # deploys Traefik reverse proxy with TLS/ACME

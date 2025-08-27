@@ -1,24 +1,23 @@
-# Initialize Swarm (manager)
+# Initialize Docker Swarm on the manager node (node1)
 - name: Initialize Swarm (manager)
-  community.docker.docker_swarm:
+  docker_swarm:
     state: present
     advertise_addr: "{{ ansible_host }}"
   when: hostvars[inventory_hostname].role == "dashboard"
   register: swarm_init
 
-# Save join tokens globally
-- name: Save join tokens globally
-  ansible.builtin.set_fact:
+# Save join tokens for reuse on worker nodes
+- name: Save Swarm join tokens
+  set_fact:
     manager_join_token: "{{ swarm_init.swarm_facts.JoinTokens.Manager }}"
     worker_join_token: "{{ swarm_init.swarm_facts.JoinTokens.Worker }}"
   when: hostvars[inventory_hostname].role == "dashboard"
   delegate_to: localhost
 
-# Join all worker nodes to Swarm
+# Join worker nodes to the swarm
 - name: Join worker nodes to swarm
-  community.docker.docker_swarm:
+  docker_swarm:
     state: join
     join_token: "{{ hostvars['localhost'].worker_join_token }}"
-    remote_addrs:
-      - "{{ hostvars['node1'].ansible_host }}"
+    remote_addrs: ["{{ hostvars['node1'].ansible_host }}"]
   when: hostvars[inventory_hostname].role == "worker"
