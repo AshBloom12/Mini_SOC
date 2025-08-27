@@ -6,15 +6,15 @@
   when: hostvars[inventory_hostname].role == "dashboard"
   register: swarm_init
 
-# Save join tokens on localhost
+# Save Swarm join tokens globally
 - name: Save Swarm join tokens
   set_fact:
     manager_join_token: "{{ swarm_init.swarm_facts.JoinTokens.Manager }}"
     worker_join_token: "{{ swarm_init.swarm_facts.JoinTokens.Worker }}"
   when: hostvars[inventory_hostname].role == "dashboard"
-  delegate_to: localhost
+  run_once: true
 
-# Ensure workers leave any existing swarm before joining
+# Ensure workers leave any existing swarm
 - name: Ensure worker nodes leave any existing swarm
   docker_swarm:
     state: absent
@@ -25,7 +25,7 @@
 - name: Join worker nodes to swarm
   docker_swarm:
     state: join
-    join_token: "{{ hostvars['localhost'].worker_join_token }}"
+    join_token: "{{ hostvars['node1'].worker_join_token }}"
     remote_addrs: ["{{ hostvars['node1'].ansible_host }}"]
   when: hostvars[inventory_hostname].role == "worker"
 
