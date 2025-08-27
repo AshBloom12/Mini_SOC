@@ -135,6 +135,7 @@ jobs:
 
       - name: Run Ansible deploy playbook
         run: |
+          echo "$ANSIBLE_VAULT_PASSWORD" | wc -c
           ansible-playbook ansible/playbooks/deploy.yml --vault-password-file <(echo $ANSIBLE_VAULT_PASSWORD)
 
 
