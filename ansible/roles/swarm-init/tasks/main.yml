@@ -78,28 +78,38 @@
     hostname: "{{ ansible_hostname }}"
     labels:
       role: "{{ hostvars[inventory_hostname].role }}"
-  delegate_to: "node1"
+  delegate_to: node1
+  run_once: false
 
 # Fix Traefik scheduling to use node label
 - name: Fix Traefik constraint to use node label
   shell: |
-    docker service update \
-      --constraint-rm 'node.role == dashboard' \
-      --constraint-add 'node.labels.role == dashboard' \
-      traefik || true
+    if docker service ls --format '{{.Name}}' | grep -q '^traefik$'; then
+      docker service update \
+        --constraint-rm 'node.role == dashboard' \
+        --constraint-add 'node.labels.role == dashboard' \
+        traefik || true
+    else
+      echo "Traefik service not found, skipping update"
+    fi
   delegate_to: node1
   run_once: true
 
-# Reset Traefik after the swarm is ready
-- name: Reset Traefik service to remove old failed tasks
+# Reset Traefik safely (remove old tasks)
+- name: Remove old Traefik tasks forcefully
   shell: |
-    {% raw %}
+    docker service ps traefik --filter "desired-state=shutdown" --format '{{.ID}}' |
+    xargs -r -n1 docker service rm || true
+  delegate_to: node1
+  run_once: true
+
+# Optionally scale Traefik up if needed
+- name: Ensure Traefik is running with 1 replica
+  shell: |
     if docker service ls --format '{{.Name}}' | grep -q '^traefik$'; then
-      docker service scale traefik=0
       docker service scale traefik=1
     else
-      echo "Traefik service not found, skipping reset"
+      echo "Traefik service not found, skipping scale"
     fi
-    {% endraw %}
   delegate_to: node1
   run_once: true
