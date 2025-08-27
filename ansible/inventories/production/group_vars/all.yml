@@ -12,3 +12,9 @@ wazuh_image_dashboard: "${WAZUH_DASHBOARD_IMAGE}"
 # Dashboard configuration
 dashboard_port: 443
 dashboard_https: true
+
+secret_names:
+  wazuh_api_user: "wazuh-api-user"
+  wazuh_api_password: "wazuh-api-password"
+  dashboard_tls_key: "traefik-dashboard-key"
+  dashboard_tls_crt: "traefik-dashboard-crt"

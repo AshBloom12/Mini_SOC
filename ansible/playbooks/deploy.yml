@@ -1,12 +1,12 @@
 # deploy.yml
 
 # Load global variables (including vault) so all plays/roles can use them
-- hosts: all
-  vars_files:
-    - group_vars/all.yml
-    - group_vars/vault.yml   # encrypted
-  gather_facts: true
-  tasks: []
+#- hosts: all
+#  vars_files:
+#    - group_vars/all.yml
+#    - group_vars/vault.yml   # encrypted
+#  gather_facts: true
+#  tasks: []
 
 # Ensure Docker is installed on all nodes
 - name: Ensure Docker is installed on all nodes
