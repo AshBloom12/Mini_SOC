@@ -123,12 +123,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-#      - name: Show nodes
-#        run: |
-#          sudo apt install yq -y
-#          echo "Nodes:"
-#          yq '.all.children.nodes.hosts | to_entries | .[] | "\(.key) \(.value.ansible_host)"' ansible/inventories/production/hosts.yml
-
       - name: Pre-flight ping to all nodes
         run: |
           echo -n "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
