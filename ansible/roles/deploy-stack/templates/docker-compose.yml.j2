@@ -7,12 +7,16 @@ networks:
 secrets:
   wazuh_api_user:
     external: true
+    name: "{{ secret_names.wazuh_api_user }}"
   wazuh_api_password:
     external: true
+    name: "{{ secret_names.wazuh_api_password }}"
   dashboard_tls_key:
     external: true
+    name: "{{ secret_names.dashboard_tls_key }}"
   dashboard_tls_crt:
     external: true
+    name: "{{ secret_names.dashboard_tls_crt }}"
 
 services:
   wazuh-manager:
