@@ -56,3 +56,13 @@
     labels:
       role: "{{ hostvars[inventory_hostname].role }}"
   delegate_to: "node1"
+
+# Fix Traefik scheduling to use node label
+- name: Fix Traefik constraint to use node label
+  shell: |
+    docker service update \
+      --constraint-rm 'node.role == dashboard' \
+      --constraint-add 'node.labels.role == dashboard' \
+      traefik || true
+  delegate_to: node1
+  run_once: true
