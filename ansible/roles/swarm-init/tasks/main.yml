@@ -22,27 +22,32 @@
   when: hostvars[inventory_hostname].role == "worker"
 
 # Remove old/duplicate nodes on manager (except current Ready workers)
-- name: Remove all nodes with ambiguous hostnames except Ready ones
+- name: Remove all nodes except the first Ready node per hostname
   shell: |
-    docker node ls --format '{{'{{.ID}}'}} {{'{{.Hostname}}'}} {{'{{.Status}}'}}' |
+    docker node ls --format '{{"{{.ID}} {{.Hostname}} {{.Status}}"}}' |
     awk '
       {nodes[$2][$3]=$1}
       END {
         for (host in nodes) {
-          # Keep the Ready node, remove all others
           for (status in nodes[host]) {
-            if (status != "Ready") {
-              print nodes[host][status]
-            }
+            if (status != "Ready") print nodes[host][status]
           }
         }
       }' |
     while read NODE_ID; do
       docker node rm "$NODE_ID" || true
     done
+
+    # Remove remaining duplicates if any
+    dups=$(docker node ls --format '{{"{{.Hostname}}"}}' | sort | uniq -d)
+    if [ -n "$dups" ]; then
+      echo "Still have duplicate nodes: $dups" >&2
+      exit 1
+    fi
   delegate_to: node1
   run_once: true
 
+# Verify only one node per hostname remains (before labeling)
 - name: Verify only one node per hostname remains
   shell: |
     count=$(docker node ls --format '{{'{{.Hostname}}'}}' | sort | uniq -d)
@@ -69,7 +74,7 @@
       sleep 5
     done
     exit 1
-  delegate_to: "node1"
+  delegate_to: node1
   when: hostvars[inventory_hostname].role == "worker"
 
 # Label nodes
@@ -84,6 +89,7 @@
 # Fix Traefik scheduling to use node label
 - name: Fix Traefik constraint to use node label
   shell: |
+    {% raw %}
     if docker service ls --format '{{.Name}}' | grep -q '^traefik$'; then
       docker service update \
         --constraint-rm 'node.role == dashboard' \
@@ -92,24 +98,32 @@
     else
       echo "Traefik service not found, skipping update"
     fi
+    {% endraw %}
   delegate_to: node1
   run_once: true
 
-# Reset Traefik safely (remove old tasks)
-- name: Remove old Traefik tasks forcefully
+# Force Traefik to restart and clear old tasks
+- name: Force Traefik to restart and clear old tasks
   shell: |
-    docker service ps traefik --filter "desired-state=shutdown" --format '{{.ID}}' |
-    xargs -r -n1 docker service rm || true
+    {% raw %}
+    if docker service ls --format '{{.Name}}' | grep -q '^traefik$'; then
+      docker service update --force traefik
+    else
+      echo "Traefik service not found, skipping update"
+    fi
+    {% endraw %}
   delegate_to: node1
   run_once: true
 
-# Optionally scale Traefik up if needed
+# Ensure Traefik is running with 1 replica
 - name: Ensure Traefik is running with 1 replica
   shell: |
+    {% raw %}
     if docker service ls --format '{{.Name}}' | grep -q '^traefik$'; then
       docker service scale traefik=1
     else
       echo "Traefik service not found, skipping scale"
     fi
+    {% endraw %}
   delegate_to: node1
   run_once: true
