@@ -135,17 +135,17 @@ jobs:
 
       - name: Create vault password file
         run: |
-          echo "${ANSIBLE_VAULT_PASSWORD}" > .vault_pass
+          echo "${ANSIBLE_VAULT_PASSWORD}" > .vault_pass.txt
         shell: bash
         env:
           ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
 
       - name: Run Ansible deploy playbook
         run: |
-          ansible-playbook ansible/playbooks/deploy.yml --vault-password-file .vault_pass
+          ansible-playbook ansible/playbooks/deploy.yml --vault-password-file .vault_pass.txt
         
       - name: Cleanup vault password
-        run: rm -f .vault_pass
+        run: rm -f .vault_pass.txt
 
       # Post-deploy checks
       - name: Verify services in Swarm
