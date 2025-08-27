@@ -145,7 +145,7 @@ jobs:
       - name: Verify services in Swarm
         run: |
           echo -n "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
-          ansible node1 -m shell -a "docker service ls && docker service ps traefik --no-trunc" -b
+          ansible node1 -m shell -a "docker service ls && docker service ps traefik --no-trunc" -b --vault-password-file /tmp/vault_pass.txt
           rm -f /tmp/vault_pass.txt
 
       - name: Verify Wazuh health (basic)
