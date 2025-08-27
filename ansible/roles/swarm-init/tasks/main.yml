@@ -1,4 +1,12 @@
-# Initialize Docker Swarm on the dashboard node (manager)
+# Wait for worker nodes to be reachable
+- name: Wait for worker nodes to be reachable via SSH
+  wait_for:
+    host: "{{ hostvars[inventory_hostname].ansible_host }}"
+    port: 22
+    timeout: 60
+  when: hostvars[inventory_hostname].role == "worker"
+
+# Initialize Swarm (manager)
 - name: Initialize Swarm (manager)
   docker_swarm:
     state: present
@@ -6,6 +14,7 @@
   when: hostvars[inventory_hostname].role == "dashboard"
   register: swarm_init
 
+# Save join tokens globally
 - name: Save join tokens globally
   set_fact:
     manager_join_token: "{{ swarm_init.swarm_facts.JoinTokens.Manager }}"
