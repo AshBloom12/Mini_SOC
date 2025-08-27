@@ -18,6 +18,8 @@
 - name: Join worker nodes to swarm
   docker_swarm:
     state: join
-    join_token: "{{ hostvars['localhost'].worker_join_token }}"
-    remote_addrs: ["{{ hostvars[groups['nodes'][0]].ansible_host }}"]
+    join_token: "{{ worker_join_token }}"
+    remote_addrs:
+      - "{{ hostvars['node1'].ansible_host }}"   # Swarm manager
   when: hostvars[inventory_hostname].role == "worker"
+  become: true
