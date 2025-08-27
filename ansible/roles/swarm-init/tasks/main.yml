@@ -24,9 +24,12 @@
 # Remove old/duplicate nodes on manager (except current Ready workers)
 - name: Remove all Down and duplicate nodes except current Ready nodes
   shell: |
-    docker node ls --format '{{"{{.ID}}"}} {{"{{.Hostname}}"}} {{"{{.Status}}"}}' | awk '$3=="Down"{print $1}' | while read NODE_ID; do
-      docker node rm "$NODE_ID" || true
-    done
+    docker node ls --format '{{"{{.ID}}"}} {{"{{.Hostname}}"}} {{"{{.Status}}"}}' \
+    | while read NODE_ID NODE_HOST NODE_STATUS; do
+        if [[ "$NODE_STATUS" == "Down" ]] || [[ "$NODE_HOST" == "ip-10-0-2-30" && "$NODE_STATUS" != "Ready" ]]; then
+          docker node rm "$NODE_ID" || true
+        fi
+      done
   delegate_to: node1
   run_once: true
 
