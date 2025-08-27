@@ -21,6 +21,14 @@
     force: true
   when: hostvars[inventory_hostname].role == "worker"
 
+- name: Remove old/down duplicate worker nodes
+  shell: |
+    for node in $(docker node ls --format '{{.ID}} {{.Hostname}} {{.Status}}' | awk '$3=="Down"{print $1}'); do
+      docker node rm "$node" || true
+    done
+  delegate_to: node1
+  run_once: true
+
 # Join worker nodes to swarm
 - name: Join worker nodes to swarm
   docker_swarm:
