@@ -33,7 +33,7 @@
 - name: Wait for workers to register in Swarm
   shell: |
     for i in $(seq 1 30); do
-      docker node ls --format '{{.Hostname}}' | grep -q "{{ ansible_hostname }}" && exit 0
+      docker node ls --format '{{"{{.Hostname}}"}}' | grep -q "{{ ansible_hostname }}" && exit 0
       sleep 5
     done
     exit 1
