@@ -132,16 +132,12 @@ jobs:
       - name: Pre-flight ping to all nodes
         run: |
           ansible all -m ping
-        
-      - name: DEBUG
-        run: |
-          echo "$ANSIBLE_VAULT_PASSWORD" | wc -c
 
       - name: Run Ansible deploy playbook
         run: |
-          echo "$ANSIBLE_VAULT_PASSWORD" | wc -c
-          ansible-playbook ansible/playbooks/deploy.yml --vault-password-file <(echo $ANSIBLE_VAULT_PASSWORD)
-
+          echo -n "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
+          ansible-playbook ansible/playbooks/deploy.yml --vault-password-file /tmp/vault_pass.txt
+          rm -f /tmp/vault_pass.txt
 
       # Post-deploy checks
       - name: Verify services in Swarm
