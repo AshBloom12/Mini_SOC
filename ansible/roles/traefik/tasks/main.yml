@@ -7,6 +7,15 @@
     scope: swarm
   when: hostvars[inventory_hostname].role == "dashboard"
 
+- name: Ensure Traefik config directory exists
+  file:
+    path: /etc/traefik
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  when: hostvars[inventory_hostname].role == "dashboard"
+
 - name: Copy Traefik static config
   copy:
     src: "{{ traefik_static_src }}"
