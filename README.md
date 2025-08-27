@@ -278,9 +278,9 @@ docker stack deploy -c stack/wazuh-stack.yml <stack_name>
 ## 📌 Assumptions
 
 * DNS/IPs are reachable from your runner
-* Security groups allow 443 (HTTPS) + Swarm ports
+* Security groups allow 80 and 443 (HTTP and HTTPS for VM2 to access Wazuh Dashboard) + Swarm ports
 * Self-hosted runner (VM1) can SSH into VM2 & VM3
-* Versions used: Python 3.12, Ansible 2.18.8, Docker 28.3.3, Trivy 0.65.0
+* Versions used: Python 3.12, Ansible 2.16.3, Docker 28.3.3, Trivy 0.65.0
 
 ---
 
