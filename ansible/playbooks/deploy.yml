@@ -71,6 +71,13 @@
         name: python3-docker
         state: present
 
+    # Ensure python jsondiff is installed to compare stack definitions and detect changes
+    - name: Ensure python jsondiff is installed
+      pip:
+        name: jsondiff
+        executable: pip3
+        state: present
+
     - name: Ensure Docker service is running
       ansible.builtin.service:
         name: docker
