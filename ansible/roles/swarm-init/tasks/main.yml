@@ -27,9 +27,9 @@
     set -e
 
     # Remove duplicate nodes by hostname, keep only one "Ready" node per hostname
-    for host in $(docker node ls --format '{{.Hostname}}' | sort | uniq -d); do
+    for host in $(docker node ls --format '{% raw %}{{.Hostname}}{% endraw %}' | sort | uniq -d); do
       echo "Checking duplicates for $host"
-      IDS=$(docker node ls --format '{{.ID}} {{.Hostname}} {{.Status}}' | grep " $host" | awk '{print $1":"$3}')
+      IDS=$(docker node ls --format '{% raw %}{{.ID}} {{.Hostname}} {{.Status}}{% endraw %}' | grep " $host" | awk '{print $1":"$3}')
       KEEP=""
       for entry in $IDS; do
         ID=$(echo $entry | cut -d: -f1)
@@ -45,13 +45,13 @@
     done
 
     # Remove any node that is not "Ready"
-    for id in $(docker node ls --format '{{.ID}} {{.Status}}' | awk '$2 != "Ready" {print $1}'); do
+    for id in $(docker node ls --format '{% raw %}{{.ID}} {{.Status}}{% endraw %}' | awk '$2 != "Ready" {print $1}'); do
       echo "Force removing non-Ready node $id"
       docker node rm -f $id || true
     done
 
     # Final check for duplicates
-    dups=$(docker node ls --format '{{.Hostname}}' | sort | uniq -d)
+    dups=$(docker node ls --format '{% raw %}{{.Hostname}}{% endraw %}' | sort | uniq -d)
     if [ -n "$dups" ]; then
       echo "Error: Duplicate nodes still exist: $dups"
       exit 1
