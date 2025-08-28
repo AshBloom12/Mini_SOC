@@ -1,4 +1,3 @@
-# roles/traefik/tasks/main.yml
 - name: Create Traefik overlay network
   docker_network:
     name: "{{ traefik_network }}"
@@ -24,6 +23,24 @@
     mode: '0700'
   when: hostvars[inventory_hostname].role == "dashboard"
 
+- name: Deploy TLS certificate
+  copy:
+    content: "{{ traefik_certificate }}"
+    dest: "{{ traefik_cert_file }}"
+    owner: root
+    group: root
+    mode: '0600'
+  when: hostvars[inventory_hostname].role == "dashboard"
+
+- name: Deploy TLS private key
+  copy:
+    content: "{{ traefik_private_key }}"
+    dest: "{{ traefik_key_file }}"
+    owner: root
+    group: root
+    mode: '0600'
+  when: hostvars[inventory_hostname].role == "dashboard"
+
 - name: Copy Traefik static config
   copy:
     src: "{{ traefik_static_src }}"
@@ -40,24 +57,6 @@
     owner: root
     group: root
     mode: '0644'
-  when: hostvars[inventory_hostname].role == "dashboard"
-
-- name: Deploy TLS certificate (from Ansible Vault)
-  copy:
-    content: "{{ traefik_certificate }}"
-    dest: "{{ traefik_cert_file }}"
-    owner: root
-    group: root
-    mode: '0600'
-  when: hostvars[inventory_hostname].role == "dashboard"
-
-- name: Deploy TLS private key (from Ansible Vault)
-  copy:
-    content: "{{ traefik_private_key }}"
-    dest: "{{ traefik_key_file }}"
-    owner: root
-    group: root
-    mode: '0600'
   when: hostvars[inventory_hostname].role == "dashboard"
 
 - name: Deploy Traefik Swarm service
@@ -96,4 +95,18 @@
       parallelism: 1
       delay: 10s
       failure_action: continue
+    restart_policy:
+      condition: any
+      delay: 5s
+      max_attempts: 10
+      window: 60s
   when: hostvars[inventory_hostname].role == "dashboard"
+
+- name: Wait for Traefik to become healthy
+  shell: |
+    until [ $(docker service ps traefik --format '{{.CurrentState}}' | grep -c Running) -eq 1 ]; do
+      echo "Waiting for Traefik..."
+      sleep 5
+    done
+  delegate_to: node1
+  run_once: true
