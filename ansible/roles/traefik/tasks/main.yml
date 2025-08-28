@@ -95,7 +95,7 @@
       parallelism: 1
       delay: 10s
       failure_action: continue
-    restart_policy:
+    restart_config:
       condition: any
       delay: 5s
       max_attempts: 10
@@ -104,9 +104,11 @@
 
 - name: Wait for Traefik to become healthy
   shell: |
+    {% raw %}
     until [ $(docker service ps traefik --format '{{.CurrentState}}' | grep -c Running) -eq 1 ]; do
       echo "Waiting for Traefik..."
       sleep 5
     done
+    {% endraw %}
   delegate_to: node1
   run_once: true
