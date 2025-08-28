@@ -2,7 +2,7 @@
 http:
   routers:
     wazuh-dashboard:
-      rule: "PathPrefix(`/`)"
+      rule: "HostRegexp(`{host:.+}`)"
       entryPoints:
         - websecure
       service: wazuh-dashboard

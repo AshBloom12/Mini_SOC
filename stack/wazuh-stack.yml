@@ -65,7 +65,7 @@ services:
     - wazuh-net
   labels:
     - "traefik.enable=true"
-    - "traefik.http.routers.wazuh-dashboard.rule=PathPrefix(`/`)"
+    - "traefik.http.routers.wazuh-dashboard.rule=HostRegexp(`{host:.+}`)
     - "traefik.http.routers.wazuh-dashboard.entrypoints=websecure"
     - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=5601"
   deploy:
