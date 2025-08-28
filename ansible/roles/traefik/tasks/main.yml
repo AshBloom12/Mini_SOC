@@ -80,11 +80,8 @@
       - source: "{{ traefik_dynamic_file }}"
         target: /etc/traefik/dynamic.yml
         type: bind
-      - source: "{{ traefik_cert_file }}"
-        target: /certs/cert.pem
-        type: bind
-      - source: "{{ traefik_key_file }}"
-        target: /certs/key.pem
+      - source: /etc/traefik/certs
+        target: /certs
         type: bind
     mode: replicated
     replicas: 1

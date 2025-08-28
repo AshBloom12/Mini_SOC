@@ -4,8 +4,8 @@ traefik_network: "traefik-public"
 # Paths on target node where configs will be placed
 traefik_static_file: "/etc/traefik/traefik.yml"
 traefik_dynamic_file: "/etc/traefik/dynamic.yml"
-traefik_cert_file: "/etc/traefik/certs/cert.pem"
-traefik_key_file: "/etc/traefik/certs/key.pem"
+# traefik_cert_file: "/etc/traefik/certs/cert.pem"
+# traefik_key_file: "/etc/traefik/certs/key.pem"
 
 # Source paths (from repo/project structure)
 traefik_static_src: "../../security/tls/traefik/traefik.yml"
