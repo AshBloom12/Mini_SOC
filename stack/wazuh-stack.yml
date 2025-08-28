@@ -8,8 +8,11 @@ networks:
 
 volumes:
   wazuh-indexer-data:
+    driver: local
   wazuh-manager-data:
+    driver: local
   wazuh-dashboard-data:
+    driver: local
 
 services:
 
