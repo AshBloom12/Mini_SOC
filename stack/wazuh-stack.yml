@@ -19,7 +19,7 @@ services:
   # Wazuh Indexer
   # ------------------------------
   wazuh-indexer:
-    image: wazuh/wazuh-indexer:4.13.0-beta2
+    image: wazuh/wazuh-indexer:4.10.3
     environment:
       - cluster.name=wazuh-cluster
       - node.name=indexer
@@ -38,7 +38,7 @@ services:
   # Wazuh Manager
   # ------------------------------
   wazuh-manager:
-    image: wazuh/wazuh-manager:4.13.0-beta2
+    image: wazuh/wazuh-manager:4.10.3
     environment:
       - ELASTICSEARCH_HOST=wazuh-indexer
       - ELASTICSEARCH_PORT=9200
@@ -58,7 +58,7 @@ services:
   # Wazuh Dashboard
   # ------------------------------
   wazuh-dashboard:
-    image: wazuh/wazuh-dashboard:4.13.0-beta2
+    image: wazuh/wazuh-dashboard:4.10.3
     environment:
       - ELASTICSEARCH_HOST=wazuh-indexer
       - ELASTICSEARCH_PORT=9200
