@@ -8,8 +8,10 @@ entryPoints:
 providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"
-    swarmMode: true
     exposedByDefault: false
+    network: traefik-public   # attach to the swarm overlay network
 
 log:
   level: INFO
+
+accessLog: {}

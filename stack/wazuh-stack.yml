@@ -56,23 +56,22 @@ services:
   # Wazuh Dashboard (Kibana)
   # ------------------------------
   wazuh-dashboard:
-    image: wazuh/wazuh-dashboard:4.13.0-beta2
-    environment:
-      - ELASTICSEARCH_HOST=wazuh-indexer
-      - ELASTICSEARCH_PORT=9200
-    networks:
-      - traefik-public
-      - wazuh-net
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.wazuh-dashboard.rule=PathPrefix(`/`)"
-      - "traefik.http.routers.wazuh-dashboard.entrypoints=websecure"
-      - "traefik.http.routers.wazuh-dashboard.tls.certificates[0].certFile=/certs/cert.pem"
-      - "traefik.http.routers.wazuh-dashboard.tls.certificates[0].keyFile=/certs/key.pem"
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.hostname == node1  # Pin to dashboard+Traefik VM
-    volumes:
-      - wazuh-dashboard-data:/usr/share/kibana/data
+  image: wazuh/wazuh-dashboard:4.13.0-beta2
+  environment:
+    - ELASTICSEARCH_HOST=wazuh-indexer
+    - ELASTICSEARCH_PORT=9200
+  networks:
+    - traefik-public
+    - wazuh-net
+  labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.wazuh-dashboard.rule=PathPrefix(`/`)"
+    - "traefik.http.routers.wazuh-dashboard.entrypoints=websecure"
+    - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=5601"
+  deploy:
+    replicas: 1
+    placement:
+      constraints:
+        - node.hostname == node1
+  volumes:
+    - wazuh-dashboard-data:/usr/share/kibana/data
