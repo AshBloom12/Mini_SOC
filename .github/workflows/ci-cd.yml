@@ -131,7 +131,7 @@ jobs:
         
       - name: Clean Swarm duplicates on manager
         run: |
-          ssh -i ./.ssh/mini-soc.pem -o StrictHostKeyChecking=no ubuntu@10.0.1.191 'bash -s' <<'EOF'
+          ssh -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no ubuntu@10.0.1.191 'bash -s' <<'EOF'
           set -e
           echo "Cleaning up duplicate Swarm nodes..."
 
