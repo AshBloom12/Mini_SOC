@@ -37,15 +37,15 @@
   delegate_to: node1
   run_once: false
 
-- name: Fix Traefik scheduling to use node label
-  shell: |
-    {% raw %}
-    if docker service ls --format '{{.Name}}' | grep -q '^traefik$'; then
-      docker service update \
-        --constraint-rm 'node.role == dashboard' \
-        --constraint-add 'node.labels.role == dashboard' \
-        traefik || true
-    fi
-    {% endraw %}
-  delegate_to: node1
-  run_once: true
+#- name: Fix Traefik scheduling to use node label
+#  shell: |
+#    {% raw %}
+#    if docker service ls --format '{{.Name}}' | grep -q '^traefik$'; then
+#      docker service update \
+#        --constraint-rm 'node.role == dashboard' \
+#        --constraint-add 'node.labels.role == dashboard' \
+#        traefik || true
+#    fi
+#    {% endraw %}
+#  delegate_to: node1
+#  run_once: true
