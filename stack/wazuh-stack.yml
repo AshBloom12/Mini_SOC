@@ -72,7 +72,7 @@ services:
       - "traefik.http.routers.wazuh-dashboard.tls=true"
       - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=5601"
     volumes:
-      - wazuh-dashboard-data:/usr/share/kibana/data
+      []
     deploy:
       replicas: 1
       placement:
