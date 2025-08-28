@@ -90,7 +90,6 @@ ansible/
 ├─ secrets/
 ├─ deploy-stack/
 └─ traefik/
-configs/opensearch_dashboards.yml     # Wazuh Dashboard config
 docker/Dockerfile                     # Custom vulnerable image for Trivy demo
 stack/wazuh-stack.yml                 # Wazuh stack for Swarm
 security/tls/traefik/traefik.yml      # Traefik static config
