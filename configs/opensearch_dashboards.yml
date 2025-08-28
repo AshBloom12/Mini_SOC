@@ -1,0 +1,2 @@
+server.host: "0.0.0.0"
+elasticsearch.hosts: ["http://wazuh-indexer:9200"]
