@@ -133,11 +133,13 @@ jobs:
         run: |
           ssh -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no ubuntu@10.0.1.191 'bash -s' <<'EOF'
           set -e
-          echo "Cleaning up duplicate Swarm nodes..."
+          echo "Cleaning up duplicate and down Swarm nodes..."
 
-          # Remove duplicate nodes by hostname, keep only one "Ready" node per hostname
-          for host in $(docker node ls --format "{{.Hostname}}" | sort | uniq -d); do
-            IDS=$(docker node ls --format "{{.ID}} {{.Hostname}} {{.Status}}" | grep " $host" | awk "{print \$1\":\"\$3}")
+          # Get list of all hostnames that have more than one node
+          for host in $(docker node ls --format '{{.Hostname}}' | sort | uniq -c | awk '$1>1 {print $2}'); do
+            echo "Checking duplicates for $host"
+            # Get all node IDs and their status for this hostname
+            IDS=$(docker node ls --format '{{.ID}} {{.Hostname}} {{.Status}}' | grep " $host" | awk '{print $1":"$3}')
             KEEP=""
             for entry in $IDS; do
               ID=$(echo $entry | cut -d: -f1)
@@ -152,8 +154,8 @@ jobs:
             done
           done
 
-          # Remove any node that is not Ready
-          for id in $(docker node ls --format "{{.ID}} {{.Status}}" | awk '$2 != "Ready" {print $1}'); do
+          # Remove any node that is not "Ready" (safety for Down nodes not caught above)
+          for id in $(docker node ls --format '{{.ID}} {{.Status}}' | awk '$2 != "Ready" {print $1}'); do
             echo "Force removing non-Ready node $id"
             docker node rm -f $id || true
           done
