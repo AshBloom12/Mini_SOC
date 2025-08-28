@@ -70,7 +70,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.wazuh-dashboard.rule=Host(`16.16.96.148`)"
       - "traefik.http.routers.wazuh-dashboard.entrypoints=websecure"
-      - "traefik.http.routers.wazuh-dashboard.tls.certresolver=myresolver"
+      - "traefik.http.routers.wazuh-dashboard.tls=true"
       - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=5601"
     volumes:
       - wazuh-dashboard-data:/usr/share/kibana/data
