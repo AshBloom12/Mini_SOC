@@ -14,10 +14,14 @@ volumes:
   wazuh-dashboard-data:
     driver: local
 
+configs:
+  wazuh_dash_config:
+    external: true  # Already created via docker config create
+
 services:
 
   # ------------------------------
-  # Wazuh Indexer (Elasticsearch)
+  # Wazuh Indexer
   # ------------------------------
   wazuh-indexer:
     image: wazuh/wazuh-indexer:4.13.0-beta2
@@ -53,13 +57,16 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == ip-10-0-2-51  # Pin to Node2 (worker)
+          - node.hostname == ip-10-0-2-51
 
   # ------------------------------
-  # Wazuh Dashboard (Kibana)
+  # Wazuh Dashboard
   # ------------------------------
   wazuh-dashboard:
     image: wazuh/wazuh-dashboard:4.13.0-beta2
+    environment:
+      - ELASTICSEARCH_HOST=wazuh-indexer
+      - ELASTICSEARCH_PORT=9200
     networks:
       - traefik-public
       - wazuh-net
@@ -68,12 +75,11 @@ services:
       - "traefik.http.routers.wazuh-dashboard.rule=HostRegexp(`{host:.+}`)"
       - "traefik.http.routers.wazuh-dashboard.entrypoints=websecure"
       - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=5601"
-    environment:
-      - ELASTICSEARCH_HOST=wazuh-indexer
-      - ELASTICSEARCH_PORT=9200
+    configs:
+      - source: wazuh_dash_config
+        target: /usr/share/wazuh-dashboard/config/opensearch_dashboards.yml
     volumes:
       - wazuh-dashboard-data:/usr/share/kibana/data
-      - ./configs/opensearch_dashboards.yml:/usr/share/wazuh-dashboard/config/opensearch_dashboards.yml:ro
     deploy:
       replicas: 1
       placement:
