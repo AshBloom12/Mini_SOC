@@ -18,27 +18,6 @@
     force: true
   when: hostvars[inventory_hostname].role == "worker"
 
-- name: Remove duplicate swarm nodes (keep only one Ready node per hostname)
-  shell: |
-    set -e
-    for host in $(docker node ls --format '{{.Hostname}}' | sort | uniq -d); do
-      IDS=$(docker node ls --format '{{.ID}} {{.Hostname}} {{.Status}}' | grep " $host" | awk '{print $1":"$3}')
-      KEEP=""
-      for entry in $IDS; do
-        ID=$(echo $entry | cut -d: -f1)
-        STATUS=$(echo $entry | cut -d: -f2)
-        if [ "$STATUS" = "Ready" ] && [ -z "$KEEP" ]; then
-          KEEP=$ID
-        else
-          docker node rm -f "$ID" || true
-        fi
-      done
-    done
-  args:
-    executable: /bin/bash
-  delegate_to: node1
-  run_once: true
-
 - name: Join worker nodes to swarm
   docker_swarm:
     state: join
