@@ -62,7 +62,7 @@
 - name: Deploy Traefik Swarm service
   docker_swarm_service:
     name: traefik
-    image: traefik:latest
+    image: traefik:v2.11
     networks:
       - name: "{{ traefik_network }}"
     publish:
