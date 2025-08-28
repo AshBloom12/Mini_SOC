@@ -1,5 +1,4 @@
-# Tasks for deploying Traefik in Docker Swarm
-
+# roles/traefik/tasks/main.yml
 - name: Create Traefik overlay network
   docker_network:
     name: "{{ traefik_network }}"
@@ -14,6 +13,15 @@
     owner: root
     group: root
     mode: '0755'
+  when: hostvars[inventory_hostname].role == "dashboard"
+
+- name: Ensure certs directory exists
+  file:
+    path: /etc/traefik/certs
+    state: directory
+    owner: root
+    group: root
+    mode: '0700'
   when: hostvars[inventory_hostname].role == "dashboard"
 
 - name: Copy Traefik static config
@@ -32,15 +40,6 @@
     owner: root
     group: root
     mode: '0644'
-  when: hostvars[inventory_hostname].role == "dashboard"
-
-- name: Ensure certs directory exists
-  file:
-    path: /etc/traefik/certs
-    state: directory
-    owner: root
-    group: root
-    mode: '0700'
   when: hostvars[inventory_hostname].role == "dashboard"
 
 - name: Deploy TLS certificate (from Ansible Vault)
@@ -65,16 +64,13 @@
   docker_swarm_service:
     name: traefik
     image: traefik:latest
+    networks:
+      - name: "{{ traefik_network }}"
     publish:
       - published_port: 80
         target_port: 80
       - published_port: 443
         target_port: 443
-    placement:
-      constraints:
-        - node.role == dashboard
-    networks:
-      - name: "{{ traefik_network }}"
     mounts:
       - source: /var/run/docker.sock
         target: /var/run/docker.sock
@@ -91,4 +87,13 @@
       - source: "{{ traefik_key_file }}"
         target: /certs/key.pem
         type: bind
+    mode: replicated
+    replicas: 1
+    placement:
+      constraints:
+        - node.labels.role == dashboard
+    update_config:
+      parallelism: 1
+      delay: 10s
+      failure_action: continue
   when: hostvars[inventory_hostname].role == "dashboard"
