@@ -12,21 +12,6 @@
   when: hostvars[inventory_hostname].role == "dashboard"
   run_once: true
 
-# Remove any existing swarm node on manager with this worker's hostname
-- name: Remove any pre-existing worker node with the same hostname
-  shell: |
-    set -e
-    EXISTING=$(docker node ls --format '{{.ID}} {{.Hostname}} {{.Status}}' | awk '$2=="{{ ansible_hostname }}" {print $1}')
-    if [ -n "$EXISTING" ]; then
-      echo "Removing existing node(s) with hostname {{ ansible_hostname }}: $EXISTING"
-      for id in $EXISTING; do
-        docker node rm -f $id || true
-      done
-    fi
-  delegate_to: node1
-  run_once: false
-  when: hostvars[inventory_hostname].role == "worker"
-
 - name: Join worker nodes to swarm
   docker_swarm:
     state: join
