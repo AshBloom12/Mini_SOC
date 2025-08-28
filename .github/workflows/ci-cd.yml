@@ -163,30 +163,6 @@ jobs:
             echo "Swarm cleanup complete."
           EOF
 
-      - name: Update Wazuh Dashboard config
-        run: |
-          ssh -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no ubuntu@10.0.1.191 'bash -s' <<'EOF'
-            set -e
-            CONFIG_NAME="wazuh_dash_config"
-            CONFIG_FILE="/home/ubuntu/actions-runner/_work/Mini_SOC/Mini_SOC/configs/opensearch_dashboards.yml"
-            TEMP_CONFIG="${CONFIG_NAME}_new"
-
-            # Remove old config if exists and not in use
-            docker config rm $CONFIG_NAME || true
-
-            # Create temporary config
-            docker config create $TEMP_CONFIG $CONFIG_FILE
-
-            # Update service with new config
-            docker service update \
-              --config-rm $CONFIG_NAME \
-              --config-add source=$TEMP_CONFIG,target=/usr/share/wazuh-dashboard/config/opensearch_dashboards.yml \
-              wazuh-stack_wazuh-dashboard || true
-
-            # Remove temporary config
-            docker config rm $TEMP_CONFIG || true
-          EOF
-
       - name: Run Ansible deploy playbook
         run: |
           echo -n "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt

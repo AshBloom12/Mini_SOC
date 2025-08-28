@@ -14,10 +14,6 @@ volumes:
   wazuh-dashboard-data:
     driver: local
 
-configs:
-  wazuh_dash_config:
-    external: true  # Already created via docker config create
-
 services:
 
   # ------------------------------
@@ -37,7 +33,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == ip-10-0-2-51  # Pin to Node2 (worker)
+          - node.hostname == ip-10-0-2-51
 
   # ------------------------------
   # Wazuh Manager
@@ -72,12 +68,10 @@ services:
       - wazuh-net
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.wazuh-dashboard.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.wazuh-dashboard.rule=Host(`16.16.96.148`)"
       - "traefik.http.routers.wazuh-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.wazuh-dashboard.tls.certresolver=myresolver"
       - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=5601"
-    configs:
-      - source: wazuh_dash_config
-        target: /usr/share/wazuh-dashboard/config/opensearch_dashboards.yml
     volumes:
       - wazuh-dashboard-data:/usr/share/kibana/data
     deploy:
