@@ -39,7 +39,10 @@ RUN yum install -y wazuh-manager-${WAZUH_VERSION}-${WAZUH_TAG_REVISION} && \
     rm /filebeat_module.sh && \
     curl -fL -o /tmp/s6-overlay-x86_64.tar.xz \
       https://github.com/just-containers/s6-overlay/releases/download/${S6_VERSION}/s6-overlay-x86_64.tar.xz && \
-    file /tmp/s6-overlay-x86_64.tar.xz
+    file /tmp/s6-overlay-x86_64.tar.xz && \
+    tar -xJf /tmp/s6-overlay-x86_64.tar.xz -C / --exclude="./bin" && \
+    tar -xJf /tmp/s6-overlay-x86_64.tar.xz -C /usr ./bin && \
+    rm /tmp/s6-overlay-x86_64.tar.xz
 
 # Copy configs
 COPY config/etc/ /etc/
