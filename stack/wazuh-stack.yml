@@ -63,7 +63,7 @@ services:
       - ELASTICSEARCH_HOST=wazuh-indexer
       - ELASTICSEARCH_PORT=9200
       # Disable HTTPS inside dashboard since Traefik handles it
-      - WAZUH_DASHBOARD_HTTPS=false
+      - DASHBOARD_HTTPS=false
     networks:
       - traefik-public
       - wazuh-net
