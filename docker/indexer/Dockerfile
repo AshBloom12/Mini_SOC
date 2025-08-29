@@ -1,9 +1,6 @@
 # Start from the official Wazuh Indexer image
 FROM wazuh/wazuh-indexer:4.12.0
 
-# Copy your certificates into the container
-COPY certs/ /etc/wazuh-indexer/certs/
-
 # Fix ownership and permissions
 # Switch to root to fix permissions
 USER root
