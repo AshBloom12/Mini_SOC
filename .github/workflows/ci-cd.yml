@@ -211,7 +211,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_KEY }}
           script: |
-            sudo chown -R 1000:1000 /home/ubuntu/config/wazuh_indexer/config
+            sudo chown -R 1000:1000 /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates
 
 
       - name: Run Ansible deploy playbook

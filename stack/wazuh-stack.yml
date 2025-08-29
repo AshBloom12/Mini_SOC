@@ -26,7 +26,7 @@ services:
       - discovery.type=single-node
     volumes:
       - wazuh-indexer-data:/var/lib/wazuh-indexer
-      - /home/ubuntu/config/wazuh_indexer/config:/usr/share/wazuh-indexer/config
+      - /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates:/etc/wazuh-indexer/certs:ro
     networks:
       - wazuh-net
     deploy:
