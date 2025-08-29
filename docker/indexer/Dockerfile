@@ -13,7 +13,7 @@ name=Wazuh repo\n\
 baseurl=https://packages.wazuh.com/4.x/yum/\n\
 gpgcheck=1\n\
 gpgkey=https://packages.wazuh.com/key/GPG-KEY-WAZUH\n\
-enabled=1" > /etc/yum.repos.d/wazuh.repoo
+enabled=1" > /etc/yum.repos.d/wazuh.repo
 
 # Copy repository check script (optional)
 COPY config/check_repository.sh /
