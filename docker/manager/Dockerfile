@@ -1,4 +1,4 @@
-# Wazuh Docker - Fixed for Amazon Linux 2023
+# Wazuh Docker for Amazon Linux 2023 - fixed dependencies
 FROM amazonlinux:2023
 
 # Use bash as default shell
@@ -13,8 +13,19 @@ ARG FILEBEAT_VERSION=7.10.2
 ARG WAZUH_FILEBEAT_MODULE
 ARG S6_VERSION="v3.2.1.0"
 
-# Install dependencies
-RUN dnf install -y curl xz gnupg tar gzip openssl findutils procps && dnf clean all
+# Install dependencies compatible with Amazon Linux 2023
+RUN dnf -y update && \
+    dnf -y install \
+        curl \
+        tar \
+        gzip \
+        findutils \
+        procps-ng \
+        gpg \
+        openssl \
+        python3 \
+        python3-pip && \
+    dnf clean all
 
 # Add Wazuh repo
 RUN rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH && \
@@ -33,7 +44,7 @@ COPY config/permanent_data.env config/permanent_data.sh /
 RUN chmod +x /check_repository.sh && /bin/bash /check_repository.sh
 
 # Install Wazuh Manager
-RUN dnf install -y wazuh-manager-${WAZUH_VERSION}-${WAZUH_TAG_REVISION} && dnf clean all
+RUN dnf -y install wazuh-manager-${WAZUH_VERSION}-${WAZUH_TAG_REVISION} --allowerasing && dnf clean all
 
 # Install Filebeat module safely
 RUN chmod +x /filebeat_module.sh && /bin/bash /filebeat_module.sh && rm /filebeat_module.sh
