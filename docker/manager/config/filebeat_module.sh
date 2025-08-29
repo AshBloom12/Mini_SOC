@@ -1,18 +1,24 @@
 #!/bin/bash
 set -e
 
+## Variables
+FILEBEAT_MODULE_VERSION="4.12.0"
+FILEBEAT_MODULE_DIR="/usr/share/filebeat/module"
+FILEBEAT_CHANNEL="${FILEBEAT_CHANNEL:-filebeat-oss}"
+FILEBEAT_VERSION="${FILEBEAT_VERSION:-7.10.2}"
+
 # Install Filebeat RPM
 curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/${FILEBEAT_CHANNEL}-${FILEBEAT_VERSION}-x86_64.rpm
 yum install -y ${FILEBEAT_CHANNEL}-${FILEBEAT_VERSION}-x86_64.rpm
 rm -f ${FILEBEAT_CHANNEL}-${FILEBEAT_VERSION}-x86_64.rpm
 
-# Download Wazuh Filebeat module directly from GitHub
+# Prepare Filebeat module directory
+mkdir -p ${FILEBEAT_MODULE_DIR}
+
+# Download Wazuh Filebeat module from GitHub for 4.12.0
 TMP_DIR=$(mktemp -d)
-git clone --branch v${WAZUH_VERSION} --depth 1 https://github.com/wazuh/wazuh.git "$TMP_DIR"
+git clone --branch "4.12.0" --depth 1 https://github.com/wazuh/wazuh.git "${TMP_DIR}"
+cp -r "${TMP_DIR}/extensions/filebeat/module/wazuh" "${FILEBEAT_MODULE_DIR}/"
+rm -rf "${TMP_DIR}"
 
-# Copy module to Filebeat directory
-mkdir -p /usr/share/filebeat/module
-cp -r "$TMP_DIR/extensions/filebeat/module/wazuh" /usr/share/filebeat/module/
-
-# Clean up
-rm -rf "$TMP_DIR"
+echo "Wazuh Filebeat module for version ${FILEBEAT_MODULE_VERSION} installed successfully."
