@@ -1,11 +1,8 @@
 #!/bin/bash
 set -e
 
-# Variables
-FILEBEAT_RPM_URL="https://artifacts.elastic.co/downloads/beats/filebeat/${FILEBEAT_CHANNEL}-${FILEBEAT_VERSION}-x86_64.rpm"
-
 # Install Filebeat RPM
-curl -L -O $FILEBEAT_RPM_URL
+curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/${FILEBEAT_CHANNEL}-${FILEBEAT_VERSION}-x86_64.rpm
 yum install -y ${FILEBEAT_CHANNEL}-${FILEBEAT_VERSION}-x86_64.rpm
 rm -f ${FILEBEAT_CHANNEL}-${FILEBEAT_VERSION}-x86_64.rpm
 
