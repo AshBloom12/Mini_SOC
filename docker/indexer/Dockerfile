@@ -6,7 +6,16 @@ ARG WAZUH_TAG_REVISION
 
 RUN yum install -y curl-minimal openssl xz tar findutils shadow-utils
 
-# Copy repository check script
+# Add Wazuh repo and import GPG key
+RUN rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH && \
+    echo -e "[wazuh]\n\
+name=Wazuh repo\n\
+baseurl=https://packages.wazuh.com/4.x/yum/\n\
+gpgcheck=1\n\
+gpgkey=https://packages.wazuh.com/key/GPG-KEY-WAZUH\n\
+enabled=1" > /etc/yum.repos.d/wazuh.repoo
+
+# Copy repository check script (optional)
 COPY config/check_repository.sh /
 RUN chmod 775 /check_repository.sh && source /check_repository.sh
 
