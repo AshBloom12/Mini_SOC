@@ -46,10 +46,32 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
 
+      - name: Generate Wazuh Indexer certificates
+        run: |
+          mkdir -p docker/indexer/certs
+          # Root CA
+          openssl req -x509 -nodes -days 365 \
+            -subj "/CN=wazuh-root-ca" \
+            -newkey rsa:4096 \
+            -keyout docker/indexer/certs/root-ca-key.pem \
+            -out docker/indexer/certs/root-ca.pem
+          # Indexer cert
+          openssl req -nodes -newkey rsa:4096 \
+            -subj "/CN=wazuh-indexer" \
+            -keyout docker/indexer/certs/indexer-key.pem \
+            -out docker/indexer/certs/indexer.csr
+          openssl x509 -req -in docker/indexer/certs/indexer.csr \
+            -CA docker/indexer/certs/root-ca.pem \
+            -CAkey docker/indexer/certs/root-ca-key.pem \
+            -CAcreateserial \
+            -out docker/indexer/certs/indexer.pem -days 365
+
       # Build images
       - name: Build indexer image
         run: |
           docker build -t ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0 -f docker/indexer/Dockerfile docker/indexer/
+          # Cleanup
+          rm docker/indexer/certs/indexer.csr docker/indexer/certs/root-ca-key.pem docker/indexer/certs/root-ca.srl
 
       # Push images to GHCR
       - name: Push Wazuh Indexer image
