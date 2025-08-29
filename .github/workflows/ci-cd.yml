@@ -121,6 +121,7 @@ jobs:
       WAZUH_MANAGER_IMAGE: wazuh/wazuh-manager:4.12.0
       WAZUH_INDEXER_IMAGE: wazuh/wazuh-indexer:4.12.0
       WAZUH_DASHBOARD_IMAGE: wazuh/wazuh-dashboard:4.12.0
+      NODE2_HOST: 10.0.2.51
       ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
       GHCR_TOKEN: ${{ secrets.GHCR_PAT }}
       GITHUB_ACTOR: ${{ github.actor }}
@@ -169,6 +170,34 @@ jobs:
 
             echo "Swarm cleanup complete."
           EOF
+
+      # Step 2: Generate Wazuh certificates locally
+      - name: Generate Wazuh Indexer certificates
+        run: |
+          mkdir -p ./config/wazuh_indexer/config
+          docker run --rm -v $PWD/config/wazuh_indexer/config:/certs wazuh/wazuh-cert-tool:4.12.0
+          sudo chown -R 1000:1000 ./config/wazuh_indexer/config
+
+      # Step 3: Copy certs/config to node2
+      - name: Copy Wazuh config to node2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: $NODE2_HOST
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          source: "./config/wazuh_indexer/config/"
+          target: "/home/ubuntu/config/wazuh_indexer/config"
+
+      # Step 4: Ensure correct ownership on node2
+      - name: Fix ownership on node2
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: $NODE2_HOST
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            sudo chown -R 1000:1000 /home/ubuntu/config/wazuh_indexer/config
+
 
       - name: Run Ansible deploy playbook
         run: |

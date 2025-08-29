@@ -25,7 +25,8 @@ services:
       - node.name=indexer
       - discovery.type=single-node
     volumes:
-      - wazuh-indexer-data:/usr/share/elasticsearch/data
+      - wazuh-indexer-data:/var/lib/wazuh-indexer
+      - /home/ubuntu/config/wazuh_indexer/config:/usr/share/wazuh-indexer/config
     networks:
       - wazuh-net
     deploy:
