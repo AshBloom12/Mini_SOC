@@ -7,7 +7,7 @@ ARG WAZUH_VERSION
 ARG WAZUH_TAG_REVISION
 ARG FILEBEAT_TEMPLATE_BRANCH
 ARG FILEBEAT_CHANNEL=filebeat-oss
-ARG FILEBEAT_VERSION=7.10.2
+ARG FILEBEAT_VERSION="7.10.2"
 ARG WAZUH_FILEBEAT_MODULE
 ARG S6_VERSION="v2.2.0.3"
 
@@ -27,6 +27,8 @@ RUN yum install wazuh-manager-${WAZUH_VERSION}-${WAZUH_TAG_REVISION} -y && \
 
 # 2. Prepare Filebeat module
 RUN chmod 775 /filebeat_module.sh
+RUN cat /filebeat_module.sh
+RUN bash -x /filebeat_module.sh
 RUN source /filebeat_module.sh
 RUN rm /filebeat_module.sh
 
