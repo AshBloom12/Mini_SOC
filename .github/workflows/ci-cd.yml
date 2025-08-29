@@ -180,7 +180,7 @@ jobs:
         run: |
           sed -i "s/<indexer-node-ip>/10.0.2.51/" config.yml
           sed -i "s/<wazuh-manager-ip>/10.0.2.51/" config.yml
-          sed -i "s/<dashboard-ip>/10.0.1.191/" config.yml
+          sed -i "s/<dashboard-node-ip>/10.0.1.191/" config.yml
 
       - name: Generate Wazuh certificates
         run: ./wazuh-certs-tool.sh -A
