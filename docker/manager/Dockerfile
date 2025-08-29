@@ -13,14 +13,16 @@ ARG FILEBEAT_VERSION=7.10.2
 ARG WAZUH_FILEBEAT_MODULE
 ARG S6_VERSION="v3.2.1.0"
 
-# Install dependencies compatible with Amazon Linux 2023
-RUN dnf -y install \
+
+# Update system and install dependencies
+RUN dnf -y upgrade --refresh && \
+    dnf -y install \
         curl \
         tar \
         gzip \
         findutils \
-        procps-ng \
-        gnupg \
+        procps \
+        gnupg2 \
         openssl \
         python3 \
         python3-pip \
