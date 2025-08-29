@@ -102,7 +102,7 @@
         password: "{{ lookup('env', 'GHCR_TOKEN') }}"
 
 - name: Pull Wazuh Indexer image on all nodes
-  hosts: all
+  hosts: node2
   become: true
   tasks:
     - name: Pull Wazuh Indexer image from GHCR

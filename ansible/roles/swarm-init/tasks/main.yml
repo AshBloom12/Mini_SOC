@@ -10,6 +10,7 @@
     manager_join_token: "{{ swarm_init.swarm_facts.JoinTokens.Manager }}"
     worker_join_token: "{{ swarm_init.swarm_facts.JoinTokens.Worker }}"
   when: hostvars[inventory_hostname].role == "dashboard"
+  delegate_to: localhost
   run_once: true
 
 - name: Join worker nodes to swarm
