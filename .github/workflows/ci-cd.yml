@@ -50,6 +50,8 @@ jobs:
       - name: Build custom Wazuh Indexer
         run: |
           docker build \
+            --build-arg WAZUH_VERSION=4.12.0 \
+            --build-arg WAZUH_TAG_REVISION=1 \
             -t ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0 \
             -f docker/indexer/Dockerfile \
             docker/indexer/
@@ -61,6 +63,10 @@ jobs:
       - name: Build custom Wazuh Manager
         run: |
           docker build \
+            --build-arg WAZUH_VERSION=4.12.0 \
+            --build-arg WAZUH_TAG_REVISION=1 \
+            --build-arg FILEBEAT_TEMPLATE_BRANCH=main \
+            --build-arg WAZUH_FILEBEAT_MODULE=wazuh \
             -t ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0 \
             -f docker/manager/Dockerfile \
             docker/manager/
@@ -72,6 +78,9 @@ jobs:
       - name: Build custom Wazuh Dashboard
         run: |
           docker build \
+            --build-arg WAZUH_VERSION=4.12.0 \
+            --build-arg WAZUH_TAG_REVISION=1 \
+            --build-arg WAZUH_UI_REVISION=4.12.0 \
             -t ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0 \
             -f docker/dashboard/Dockerfile \
             docker/dashboard/
