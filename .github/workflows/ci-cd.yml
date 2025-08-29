@@ -185,13 +185,6 @@ jobs:
       - name: Generate Wazuh certificates
         run: ./wazuh-certs-tool.sh -A
 
-      - name: Fix ownership of Wazuh certs on node2 via SSH
-        run: |
-          ssh -i ${{ secrets.SSH_KEY }} -o StrictHostKeyChecking=no ubuntu@10.0.2.51 "
-            sudo chown -R 1000:1000 /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates
-            sudo chmod 600 /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates/*.pem
-          "
-
       - name: Copy certs to node2
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -201,15 +194,12 @@ jobs:
           source: "./wazuh-certificates/"
           target: "/home/ubuntu/config/wazuh_indexer/config"
 
-      - name: Fix ownership on node2
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: 10.0.2.51
-          username: ubuntu
-          key: ${{ secrets.SSH_KEY }}
-          script: |
+      - name: Fix ownership of Wazuh certs on node2 via SSH
+        run: |
+          ssh -i ~/.ssh/mini-soc.pem -o StrictHostKeyChecking=no ubuntu@10.0.2.51 "
             sudo chown -R 1000:1000 /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates
-
+            sudo chmod 600 /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates/*.pem
+          "
 
       - name: Run Ansible deploy playbook
         run: |
