@@ -1,8 +1,10 @@
 # Wazuh Docker Copyright (C) 2017, Wazuh Inc. (License GPLv2)
 FROM amazonlinux:2023
 
+# Use bash as default shell
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
+# Arguments
 ARG WAZUH_VERSION
 ARG WAZUH_TAG_REVISION
 ARG FILEBEAT_TEMPLATE_BRANCH
@@ -12,7 +14,7 @@ ARG WAZUH_FILEBEAT_MODULE
 ARG S6_VERSION="v3.2.1.0"
 
 # Install dependencies
-RUN yum install -y curl-minimal xz gnupg tar gzip openssl findutils procps && \
+RUN yum install -y curl xz gnupg tar gzip openssl findutils procps && \
     yum clean all
 
 # Add Wazuh yum repo + GPG key
@@ -25,27 +27,24 @@ gpgkey=https://packages.wazuh.com/key/GPG-KEY-WAZUH\n\
 enabled=1" > /etc/yum.repos.d/wazuh.repo
 
 # Copy helper scripts
-COPY config/check_repository.sh /
-COPY config/filebeat_module.sh /
+COPY config/check_repository.sh / 
+COPY config/filebeat_module.sh / 
 COPY config/permanent_data.env config/permanent_data.sh /
 
-RUN chmod 775 /check_repository.sh && source /check_repository.sh
+RUN chmod 775 /check_repository.sh && /bin/bash -c "source /check_repository.sh"
 
 # Install Wazuh Manager + Filebeat module + s6-overlay
 RUN yum install -y wazuh-manager-${WAZUH_VERSION}-${WAZUH_TAG_REVISION} && \
     yum clean all && \
-    chmod 775 /filebeat_module.sh && \
-    /bin/bash -c "source /filebeat_module.sh" && \
+    chmod 775 /filebeat_module.sh && /bin/bash -c "source /filebeat_module.sh" && \
     rm /filebeat_module.sh && \
     \
-    # Download a verified s6-overlay release
-    curl -fSL -o /tmp/s6-overlay-x86_64.tar.xz \
-      https://github.com/just-containers/s6-overlay/releases/download/v3.2.0.3/s6-overlay-x86_64.tar.xz && \
-    \
-    # Verify download
+    # Download s6-overlay using GitHub release direct URL
+    curl -fSLJ -o /tmp/s6-overlay-x86_64.tar.xz \
+      https://github.com/just-containers/s6-overlay/releases/download/v3.2.1.0/s6-overlay-x86_64.tar.xz && \
     file /tmp/s6-overlay-x86_64.tar.xz && \
     \
-    # Extract safely
+    # Extract to temporary folder, then copy
     mkdir -p /tmp/s6 && \
     tar -xJf /tmp/s6-overlay-x86_64.tar.xz -C /tmp/s6 && \
     cp -r /tmp/s6/* / && \
