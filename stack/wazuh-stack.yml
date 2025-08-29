@@ -59,6 +59,8 @@ services:
   # ------------------------------
   wazuh-dashboard:
     image: wazuh/wazuh-dashboard:4.10.3
+    ports:
+      - "8080:5601"   # HTTP only
     environment:
       - ELASTICSEARCH_HOST=wazuh-indexer
       - ELASTICSEARCH_PORT=9200
@@ -66,13 +68,10 @@ services:
       - traefik-public
       - wazuh-net
     labels:
-      - "traefik.enable=true"
       - "traefik.http.routers.wazuh-dashboard.rule=Host(`16.16.96.148`)"
       - "traefik.http.routers.wazuh-dashboard.entrypoints=websecure"
       - "traefik.http.routers.wazuh-dashboard.tls=true"
-      - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=5601"
-    volumes:
-      - /home/ubuntu/wazuh-dashboard.yml:/usr/share/wazuh-dashboard/config/wazuh-dashboard.yml:ro
+      - "traefik.http.routers.wazuh-dashboard.middlewares=https-redirect@file"
     deploy:
       replicas: 1
       placement:
