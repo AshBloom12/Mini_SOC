@@ -171,14 +171,17 @@ jobs:
             echo "Swarm cleanup complete."
           EOF
 
-      # Step 2: Generate Wazuh certificates locally
-      - name: Generate Wazuh Indexer certificates
+      - name: Prepare local certificate folder
+        run: mkdir -p ./config/wazuh_indexer/config
+
+      - name: Generate Wazuh certificates
         run: |
-          mkdir -p ./config/wazuh_indexer/config
-          docker run --rm -v $PWD/config/wazuh_indexer/config:/certs wazuh/wazuh-cert-tool:4.12.0
+          docker run --rm \
+            -v $PWD/config/wazuh_indexer/config:/certs \
+            wazuh/wazuh-manager:4.12.0 \
+            /bin/bash -c "/usr/share/wazuh-manager/wazuh-certs-tool.sh -A"
           sudo chown -R 1000:1000 ./config/wazuh_indexer/config
 
-      # Step 3: Copy certs/config to node2
       - name: Copy Wazuh config to node2
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -188,7 +191,6 @@ jobs:
           source: "./config/wazuh_indexer/config/"
           target: "/home/ubuntu/config/wazuh_indexer/config"
 
-      # Step 4: Ensure correct ownership on node2
       - name: Fix ownership on node2
         uses: appleboy/ssh-action@v0.1.7
         with:
