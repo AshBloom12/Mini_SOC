@@ -9,7 +9,7 @@ ARG FILEBEAT_TEMPLATE_BRANCH
 ARG FILEBEAT_CHANNEL=filebeat-oss
 ARG FILEBEAT_VERSION=7.10.2
 ARG WAZUH_FILEBEAT_MODULE
-ARG S6_VERSION="v3.2.1.0"
+ARG S6_VERSION="v3.2.0.3"
 
 # Install dependencies
 RUN yum install -y curl-minimal xz gnupg tar gzip openssl findutils procps && \
@@ -42,15 +42,13 @@ RUN yum install -y wazuh-manager-${WAZUH_VERSION}-${WAZUH_TAG_REVISION} && \
     curl -fL -o /tmp/s6-overlay-x86_64.tar.xz \
       https://github.com/just-containers/s6-overlay/releases/download/${S6_VERSION}/s6-overlay-x86_64.tar.xz && \
     \
-    # Verify download
+    # Verify file size
+    ls -lh /tmp/s6-overlay-x86_64.tar.xz && \
     file /tmp/s6-overlay-x86_64.tar.xz && \
     \
-    # Extract all files to /, except ./bin
-    mkdir -p /tmp/s6 && \
-    tar -xJf /tmp/s6-overlay-x86_64.tar.xz -C /tmp/s6 && \
-    cp -r /tmp/s6/* / && \
-    cp -r /tmp/s6/bin/* /usr/bin/ && \
-    rm -rf /tmp/s6 /tmp/s6-overlay-x86_64.tar.xz
+    # Extract directly to /
+    tar -xJf /tmp/s6-overlay-x86_64.tar.xz -C / && \
+    rm -f /tmp/s6-overlay-x86_64.tar.xz
 
 # Copy configs
 COPY config/etc/ /etc/
