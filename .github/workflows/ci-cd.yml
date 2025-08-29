@@ -197,8 +197,7 @@ jobs:
       - name: Fix ownership of Wazuh certs on node2 via SSH
         run: |
           ssh -i ~/.ssh/mini-soc.pem -o StrictHostKeyChecking=no ubuntu@10.0.2.51 "
-            sudo chown -R 1000:1000 /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates
-            sudo find /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates -type f -exec chmod 600 {} \;
+            sudo find /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates -type f -exec chmod 644 {} \;
           "
 
       - name: Run Ansible deploy playbook
