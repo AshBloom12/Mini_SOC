@@ -100,6 +100,16 @@
         registry_url: ghcr.io
         username: "{{ lookup('env', 'GITHUB_ACTOR') }}"
         password: "{{ lookup('env', 'GHCR_TOKEN') }}"
+
+- name: Pull Wazuh Indexer image on all nodes
+  hosts: node2
+  become: true
+  tasks:
+    - name: Pull Wazuh Indexer image from GHCR
+      ansible.builtin.docker_image:
+        name: "{{ lookup('env', 'WAZUH_INDEXER_IMAGE') }}"
+        source: pull
+
   roles:
     - swarm-init    # initializes Swarm and sets join tokens
     - networks      # creates overlay networks
