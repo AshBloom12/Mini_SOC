@@ -65,24 +65,24 @@ jobs:
       # Pull official images (specify a version tag if needed)
       - name: Pull Wazuh images
         run: |
-          docker pull wazuh/wazuh-manager:4.10.3
-          docker pull wazuh/wazuh-indexer:4.10.3
-          docker pull wazuh/wazuh-dashboard:4.10.3
+          docker pull wazuh/wazuh-manager:4.12.0
+          docker pull wazuh/wazuh-indexer:4.12.0
+          docker pull wazuh/wazuh-dashboard:4.12.0
 
       - name: Scan Wazuh Manager
         run: |
-          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-manager-report.json wazuh/wazuh-manager:4.10.3
-          trivy image --ignorefile ./trivy/.trivyignore --format table wazuh/wazuh-manager:4.10.3
+          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-manager-report.json wazuh/wazuh-manager:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format table wazuh/wazuh-manager:4.12.0
 
       - name: Scan Wazuh Indexer
         run: |
-          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-indexer-report.json wazuh/wazuh-indexer:4.10.3
-          trivy image --ignorefile ./trivy/.trivyignore --format table wazuh/wazuh-indexer:4.10.3
+          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-indexer-report.json wazuh/wazuh-indexer:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format table wazuh/wazuh-indexer:4.12.0
 
       - name: Scan Wazuh Dashboard
         run: |
-          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-dashboard-report.json wazuh/wazuh-dashboard:4.10.3
-          trivy image --ignorefile ./trivy/.trivyignore --format table wazuh/wazuh-dashboard:4.10.3
+          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-dashboard-report.json wazuh/wazuh-dashboard:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format table wazuh/wazuh-dashboard:4.12.0
 
       # Always upload reports, even if scan fails
       - name: Upload Trivy reports as artifacts
@@ -111,9 +111,9 @@ jobs:
     runs-on: self-hosted
    
     env:
-      WAZUH_MANAGER_IMAGE: wazuh/wazuh-manager:4.10.3
-      WAZUH_INDEXER_IMAGE: wazuh/wazuh-indexer:4.10.3
-      WAZUH_DASHBOARD_IMAGE: wazuh/wazuh-dashboard:4.10.3
+      WAZUH_MANAGER_IMAGE: wazuh/wazuh-manager:4.12.0
+      WAZUH_INDEXER_IMAGE: wazuh/wazuh-indexer:4.12.0
+      WAZUH_DASHBOARD_IMAGE: wazuh/wazuh-dashboard:4.12.0
       ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
       GHCR_TOKEN: ${{ secrets.GHCR_PAT }}
       GITHUB_ACTOR: ${{ github.actor }}

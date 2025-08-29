@@ -19,7 +19,7 @@ services:
   # Wazuh Indexer
   # ------------------------------
   wazuh-indexer:
-    image: wazuh/wazuh-indexer:4.10.3
+    image: wazuh/wazuh-indexer:4.12.0
     environment:
       - cluster.name=wazuh-cluster
       - node.name=indexer
@@ -38,7 +38,7 @@ services:
   # Wazuh Manager
   # ------------------------------
   wazuh-manager:
-    image: wazuh/wazuh-manager:4.10.3
+    image: wazuh/wazuh-manager:4.12.0
     environment:
       - ELASTICSEARCH_HOST=wazuh-indexer
       - ELASTICSEARCH_PORT=9200
@@ -58,7 +58,7 @@ services:
   # Wazuh Dashboard
   # ------------------------------
   wazuh-dashboard:
-    image: wazuh/wazuh-dashboard:4.10.3
+    image: wazuh/wazuh-dashboard:4.12.0
     ports:
       - "8080:5601"   # HTTP only
     environment:
@@ -68,10 +68,12 @@ services:
       - traefik-public
       - wazuh-net
     labels:
+      - "traefik.enable=true"
       - "traefik.http.routers.wazuh-dashboard.rule=Host(`16.16.96.148`)"
       - "traefik.http.routers.wazuh-dashboard.entrypoints=websecure"
       - "traefik.http.routers.wazuh-dashboard.tls=true"
-      - "traefik.http.routers.wazuh-dashboard.middlewares=https-redirect@file"
+      - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=5601"
+
     deploy:
       replicas: 1
       placement:

@@ -100,7 +100,6 @@
         registry_url: ghcr.io
         username: "{{ lookup('env', 'GITHUB_ACTOR') }}"
         password: "{{ lookup('env', 'GHCR_TOKEN') }}"
-
   roles:
     - swarm-init    # initializes Swarm and sets join tokens
     - networks      # creates overlay networks
