@@ -46,37 +46,35 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
 
-      - name: Clone wazuh-docker repo
-        run: |
-          git clone --branch 4.12 https://github.com/wazuh/wazuh-docker.git /tmp/wazuh-docker        
-
-      # Build and Push Wazuh Images
+      # Build and Push Wazuh Indexer
       - name: Build custom Wazuh Indexer
         run: |
           docker build \
             -t ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0 \
-            -f /tmp/wazuh-docker/indexer/Dockerfile \
-            /tmp/wazuh-docker/indexer/
+            -f docker/indexer/Dockerfile \
+            docker/indexer/
 
       - name: Push Wazuh Indexer image
         run: docker push ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
 
+      # Build and Push Wazuh Manager
       - name: Build custom Wazuh Manager
         run: |
           docker build \
             -t ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0 \
-            -f /tmp/wazuh-docker/manager/Dockerfile \
-            /tmp/wazuh-docker/manager/
+            -f docker/manager/Dockerfile \
+            docker/manager/
 
       - name: Push Wazuh Manager image
         run: docker push ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0
 
+      # Build and Push Wazuh Dashboard
       - name: Build custom Wazuh Dashboard
         run: |
           docker build \
             -t ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0 \
-            -f /tmp/wazuh-docker/dashboard/Dockerfile \
-            /tmp/wazuh-docker/dashboard/
+            -f docker/dashboard/Dockerfile \
+            docker/dashboard/
 
       - name: Push Wazuh Dashboard image
         run: docker push ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0
