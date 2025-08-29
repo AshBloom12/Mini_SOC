@@ -170,6 +170,37 @@ jobs:
             echo "Swarm cleanup complete."
           EOF
 
+      - name: Download Wazuh cert tool
+        run: |
+          curl -sO https://packages.wazuh.com/4.12/wazuh-certs-tool.sh
+          curl -sO https://packages.wazuh.com/4.12/config.yml
+          chmod +x wazuh-certs-tool.sh
+
+      - name: Update config.yml
+        run: |
+          sed -i "s/<indexer-node-ip>/10.0.2.51/" config.yml
+          sed -i "s/<wazuh-manager-ip>/10.0.2.51/" config.yml
+          sed -i "s/<dashboard-node-ip>/10.0.1.191/" config.yml
+
+      - name: Generate Wazuh certificates
+        run: ./wazuh-certs-tool.sh -A
+
+      - name: Copy certs to node2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 10.0.2.51
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          source: "./wazuh-certificates/"
+          target: "/home/ubuntu/config/wazuh_indexer/config"
+
+      - name: Fix ownership of Wazuh certs on node2 via SSH
+        run: |
+          ssh -i ~/.ssh/mini-soc.pem -o StrictHostKeyChecking=no ubuntu@10.0.2.51 "
+            sudo chown -R 1000:1000 /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates
+            sudo find /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates -type f -exec chmod 600 {} \;
+          "
+
       - name: Run Ansible deploy playbook
         run: |
           echo -n "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt

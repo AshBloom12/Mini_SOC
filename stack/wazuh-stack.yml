@@ -9,49 +9,27 @@ networks:
 volumes:
   wazuh-indexer-data:
     driver: local
-  wazuh-indexer-certs:
-    driver: local
   wazuh-manager-data:
     driver: local
   wazuh-dashboard-data:
-    driver: local
+
 
 services:
-
-  # ------------------------------
-  # Wazuh Indexer Init (populate certs)
-  # ------------------------------
-  wazuh-indexer-init:
-    image: alpine:3.18
-    command: >
-      sh -c "cp -r /certs/* /cert-volume/ && chown -R 1000:1000 /cert-volume && chmod -R 400 /cert-volume"
-    volumes:
-      - /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates:/certs:ro
-      - wazuh-indexer-certs:/cert-volume
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: none
-      placement:
-        constraints:
-          - node.hostname == ip-10-0-2-51
-
   # ------------------------------
   # Wazuh Indexer
   # ------------------------------
   wazuh-indexer:
     image: wazuh/wazuh-indexer:4.12.0
+    user: "0:0"
     environment:
       - cluster.name=wazuh-cluster
       - node.name=indexer
       - discovery.type=single-node
     volumes:
       - wazuh-indexer-data:/var/lib/wazuh-indexer
-      - wazuh-indexer-certs:/etc/wazuh-indexer/certs:ro
+      - /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates:/etc/wazuh-indexer/certs:ro
     networks:
       - wazuh-net
-    depends_on:
-      - wazuh-indexer-init
     deploy:
       replicas: 1
       placement:
