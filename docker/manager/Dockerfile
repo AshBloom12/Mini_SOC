@@ -7,7 +7,6 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 # Arguments
 ARG WAZUH_VERSION
 ARG WAZUH_TAG_REVISION
-ARG FILEBEAT_CHANNEL=filebeat-oss
 ARG FILEBEAT_VERSION=7.10.2
 ARG S6_VERSION="v3.2.1.0"
 
