@@ -39,21 +39,48 @@ jobs:
         # Checks out your repository under $GITHUB_WORKSPACE, so your job can access it
         uses: actions/checkout@v4
         
-    #  - name: Log in to GitHub Container Registry
-    #    uses: docker/login-action@v3
-    #    with:
-    #      registry: ghcr.io
-    #      username: ${{ github.actor }}
-    #      password: ${{ secrets.GHCR_PAT }}        
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
 
-      # Build images
-    #  - name: Build indexer image
-    #    run: |
-    #      docker build -t ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0 -f docker/indexer/Dockerfile docker/indexer/
+      - name: Clone wazuh-docker repo
+        run: |
+          git clone --branch 4.12 https://github.com/wazuh/wazuh-docker.git /tmp/wazuh-docker        
 
-      # Push images to GHCR
-    #  - name: Push Wazuh Indexer image
-    #    run: docker push ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
+      # Build and Push Wazuh Images
+      - name: Build custom Wazuh Indexer
+        run: |
+          docker build \
+            -t ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0 \
+            -f /tmp/wazuh-docker/indexer/Dockerfile \
+            /tmp/wazuh-docker/indexer/
+
+      - name: Push Wazuh Indexer image
+        run: docker push ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
+
+      - name: Build custom Wazuh Manager
+        run: |
+          docker build \
+            -t ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0 \
+            -f /tmp/wazuh-docker/manager/Dockerfile \
+            /tmp/wazuh-docker/manager/
+
+      - name: Push Wazuh Manager image
+        run: docker push ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0
+
+      - name: Build custom Wazuh Dashboard
+        run: |
+          docker build \
+            -t ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0 \
+            -f /tmp/wazuh-docker/dashboard/Dockerfile \
+            /tmp/wazuh-docker/dashboard/
+
+      - name: Push Wazuh Dashboard image
+        run: docker push ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0
+
   # ---------------- SECURITY SCAN ----------------
   scan:
     needs: build
@@ -118,9 +145,9 @@ jobs:
     runs-on: self-hosted
    
     env:
-      WAZUH_MANAGER_IMAGE: wazuh/wazuh-manager:4.12.0
-      WAZUH_INDEXER_IMAGE: wazuh/wazuh-indexer:4.12.0
-      WAZUH_DASHBOARD_IMAGE: wazuh/wazuh-dashboard:4.12.0
+      WAZUH_MANAGER_IMAGE: ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0
+      WAZUH_INDEXER_IMAGE: ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
+      WAZUH_DASHBOARD_IMAGE: ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0
       ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
       GHCR_TOKEN: ${{ secrets.GHCR_PAT }}
       GITHUB_ACTOR: ${{ github.actor }}
@@ -130,44 +157,48 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Generate self-signed certs
+        run: |
+          mkdir -p certs/indexer
+          bash scripts/generate-certs.sh certs/indexer
+
+      - name: Create Docker secrets
+        run: |
+          docker secret create indexer-key certs/indexer/indexer-key.pem
+          docker secret create indexer-cert certs/indexer/indexer.pem
+          docker secret create root-ca certs/indexer/root-ca.pem
+
+          docker secret create dashboard-key certs/dashboard/dashboard-key.pem
+          docker secret create dashboard-cert certs/dashboard/dashboard.pem
+
       - name: Pre-flight ping to all nodes
         run: |
           echo -n "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
           ansible all -m ping --vault-password-file /tmp/vault_pass.txt
           rm -f /tmp/vault_pass.txt
-        
+
       - name: Clean Swarm duplicates on manager
         run: |
           ssh -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no ubuntu@10.0.1.191 'bash -s' <<'EOF'
-            set -e
-            echo "Cleaning up duplicate and down Swarm nodes..."
-
-            # Get all hostnames with more than one node
-            for host in $(docker node ls --format '{{.Hostname}}' | sort | uniq -c | awk '$1>1 {print $2}'); do
-              echo "Checking duplicates for $host"
-              # Get all node IDs and their status for this hostname
-              IDS=$(docker node ls --format '{{.ID}} {{.Hostname}} {{.Status}}' | grep " $host" | awk '{print $1":"$3}')
-              KEEP=""
-              for entry in $IDS; do
-                ID=$(echo $entry | cut -d: -f1)
-                STATUS=$(echo $entry | cut -d: -f2)
-                if [ "$STATUS" = "Ready" ] && [ -z "$KEEP" ]; then
-                  KEEP=$ID
-                  echo "Keeping Ready node $ID for $host"
-                else
-                  echo "Removing duplicate node $ID for $host (status=$STATUS)"
-                  docker node rm -f "$ID" || true
-                fi
-              done
+          set -e
+          echo "Cleaning up duplicate and down Swarm nodes..."
+          for host in $(docker node ls --format '{{.Hostname}}' | sort | uniq -c | awk '$1>1 {print $2}'); do
+            IDS=$(docker node ls --format '{{.ID}} {{.Hostname}} {{.Status}}' | grep " $host" | awk '{print $1":"$3}')
+            KEEP=""
+            for entry in $IDS; do
+              ID=$(echo $entry | cut -d: -f1)
+              STATUS=$(echo $entry | cut -d: -f2)
+              if [ "$STATUS" = "Ready" ] && [ -z "$KEEP" ]; then
+                KEEP=$ID
+              else
+                docker node rm -f "$ID" || true
+              fi
             done
-
-            # Remove any remaining nodes that are not Ready
-            for id in $(docker node ls --format '{{.ID}} {{.Status}}' | awk '$2 != "Ready" {print $1}'); do
-              echo "Force removing non-Ready node $id"
-              docker node rm -f $id || true
-            done
-
-            echo "Swarm cleanup complete."
+          done
+          for id in $(docker node ls --format '{{.ID}} {{.Status}}' | awk '$2 != "Ready" {print $1}'); do
+            docker node rm -f $id || true
+          done
+          echo "Swarm cleanup complete."
           EOF
 
       - name: Run Ansible deploy playbook
@@ -176,7 +207,6 @@ jobs:
           ansible-playbook ansible/playbooks/deploy.yml --vault-password-file /tmp/vault_pass.txt
           rm -f /tmp/vault_pass.txt
 
-      # Post-deploy checks
       - name: Verify services in Swarm
         run: |
           echo -n "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt

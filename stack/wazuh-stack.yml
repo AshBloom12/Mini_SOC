@@ -13,36 +13,38 @@ volumes:
     driver: local
   wazuh-dashboard-data:
 
+secrets:
+  indexer-key:
+    external: true
+  indexer-cert:
+    external: true
+  root-ca:
+    external: true
 
 services:
-  # ------------------------------
-  # Wazuh Indexer
-  # ------------------------------
+  # ---------------- Wazuh Indexer ----------------
   wazuh-indexer:
-    image: wazuh/wazuh-indexer:4.12.0
-    environment:
-      - DISABLE_SECURITY_PLUGIN=true
-      - OPENSEARCH_SECURITY_DISABLED=true
-      - cluster.name=wazuh-cluster
-      - node.name=indexer
-      - discovery.type=single-node
-    command: ["opensearch", "-Dopensearch.security.disabled=true"]
+    image: ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
     volumes:
       - wazuh-indexer-data:/var/lib/wazuh-indexer
-      - /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates:/etc/wazuh-indexer/certs:ro
     networks:
       - wazuh-net
+    secrets:
+      - source: indexer-key
+        target: indexer-key.pem
+      - source: indexer-cert
+        target: indexer.pem
+      - source: root-ca
+        target: root-ca.pem
     deploy:
       replicas: 1
       placement:
         constraints:
           - node.hostname == ip-10-0-2-51
 
-  # ------------------------------
-  # Wazuh Manager
-  # ------------------------------
+  # ---------------- Wazuh Manager ----------------
   wazuh-manager:
-    image: wazuh/wazuh-manager:4.12.0
+    image: ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0
     environment:
       - ELASTICSEARCH_HOST=wazuh-indexer
       - ELASTICSEARCH_PORT=9200
@@ -58,11 +60,9 @@ services:
         constraints:
           - node.hostname == ip-10-0-2-51
 
-  # ------------------------------
-  # Wazuh Dashboard
-  # ------------------------------
+  # ---------------- Wazuh Dashboard ----------------
   wazuh-dashboard:
-    image: wazuh/wazuh-dashboard:4.12.0
+    image: ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0
     ports:
       - "5601:5601"
     environment:

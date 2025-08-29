@@ -5,12 +5,15 @@ networks:
     external: true
 
 secrets:
+  # Wazuh API user/password for dashboard and manager
   wazuh_api_user:
     external: true
     name: "{{ secret_names.wazuh_api_user }}"
   wazuh_api_password:
     external: true
     name: "{{ secret_names.wazuh_api_password }}"
+
+  # Dashboard TLS
   dashboard_tls_key:
     external: true
     name: "{{ secret_names.dashboard_tls_key }}"
@@ -18,7 +21,19 @@ secrets:
     external: true
     name: "{{ secret_names.dashboard_tls_crt }}"
 
+  # Internal TLS for Indexer
+  indexer_key:
+    external: true
+    name: indexer-key
+  indexer_cert:
+    external: true
+    name: indexer-cert
+  root_ca:
+    external: true
+    name: root-ca
+
 services:
+  # ---------------- Wazuh Manager ----------------
   wazuh-manager:
     image: "{{ wazuh_image_manager }}"
     networks:
@@ -37,7 +52,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.labels.role == worker  # Wazuh manager goes to worker (node2)
+          - node.labels.role == worker
       update_config:
         parallelism: 1
         delay: 10s
@@ -46,15 +61,26 @@ services:
         parallelism: 1
         delay: 10s
 
+  # ---------------- Wazuh Indexer ----------------
   wazuh-indexer:
     image: "{{ wazuh_image_indexer }}"
     networks:
       - wazuh-net
+    secrets:
+      - source: indexer_key
+        target: indexer-key.pem
+        mode: 0400
+      - source: indexer_cert
+        target: indexer.pem
+        mode: 0444
+      - source: root_ca
+        target: root-ca.pem
+        mode: 0444
     deploy:
       replicas: 1
       placement:
         constraints:
-          - node.labels.role == worker  # Wazuh indexer goes to worker (node2)
+          - node.labels.role == worker
       update_config:
         parallelism: 1
         delay: 10s
@@ -63,6 +89,7 @@ services:
         parallelism: 1
         delay: 10s
 
+  # ---------------- Wazuh Dashboard ----------------
   wazuh-dashboard:
     image: "{{ wazuh_image_dashboard }}"
     networks:
@@ -74,6 +101,12 @@ services:
       - source: dashboard_tls_crt
         target: dashboard_tls_crt
         mode: 0444
+      - source: wazuh_api_user
+        target: wazuh_api_user
+        mode: 0400
+      - source: wazuh_api_password
+        target: wazuh_api_password
+        mode: 0400
     environment:
       TLS_KEY_FILE: "/run/secrets/dashboard_tls_key"
       TLS_CRT_FILE: "/run/secrets/dashboard_tls_crt"
@@ -83,7 +116,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.labels.role == dashboard  # Dashboard goes to manager (node1)
+          - node.labels.role == dashboard
       update_config:
         parallelism: 1
         delay: 10s
