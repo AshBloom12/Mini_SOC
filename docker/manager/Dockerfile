@@ -11,7 +11,7 @@ ARG FILEBEAT_TEMPLATE_BRANCH
 ARG FILEBEAT_CHANNEL=filebeat-oss
 ARG FILEBEAT_VERSION=7.10.2
 ARG WAZUH_FILEBEAT_MODULE
-ARG S6_VERSION="v3.2.1.0"
+ARG S6_VERSION="v2.2.0.3"
 
 # Install dependencies
 RUN yum swap -y curl-minimal curl && \
