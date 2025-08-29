@@ -114,7 +114,7 @@
   tasks:
     - name: Copy wazuh-dashboard.yml from project to host
       copy:
-        src: ./configs/wazuh-dashboard.yml
+        src: ../../configs/wazuh-dashboard.yml
         dest: /home/ubuntu/wazuh-dashboard.yml
         owner: ubuntu
         group: ubuntu
