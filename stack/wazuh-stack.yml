@@ -21,12 +21,13 @@ services:
   wazuh-indexer:
     image: wazuh/wazuh-indexer:4.12.0
     environment:
+      - DISABLE_SECURITY_PLUGIN=true
       - cluster.name=wazuh-cluster
       - node.name=indexer
       - discovery.type=single-node
     volumes:
       - wazuh-indexer-data:/var/lib/wazuh-indexer
-      - wazuh-certs:/etc/wazuh-indexer/certs:ro
+      - /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates:/etc/wazuh-indexer/certs:ro
     networks:
       - wazuh-net
     deploy:
