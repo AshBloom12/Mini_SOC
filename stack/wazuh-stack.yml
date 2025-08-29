@@ -22,6 +22,7 @@ services:
     image: wazuh/wazuh-indexer:4.12.0
     environment:
       - DISABLE_SECURITY_PLUGIN=true
+      - OPENSEARCH_SECURITY_DISABLED=true
       - cluster.name=wazuh-cluster
       - node.name=indexer
       - discovery.type=single-node
