@@ -19,7 +19,7 @@ services:
   # Wazuh Indexer
   # ------------------------------
   wazuh-indexer:
-    image: wazuh/wazuh-indexer:4.12.0
+    image: $WAZUH_INDEXER_IMAGE
     environment:
       - cluster.name=wazuh-cluster
       - node.name=indexer
@@ -28,7 +28,6 @@ services:
       - wazuh-indexer-data:/usr/share/elasticsearch/data
     networks:
       - wazuh-net
-    user: 0
     deploy:
       replicas: 1
       placement:

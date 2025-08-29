@@ -39,21 +39,21 @@ jobs:
         # Checks out your repository under $GITHUB_WORKSPACE, so your job can access it
         uses: actions/checkout@v4
         
-    #  - name: Log in to GitHub Container Registry
-    #    uses: docker/login-action@v3
-    #    with:
-    #      registry: ghcr.io
-    #      username: ${{ github.actor }}
-    #      password: ${{ secrets.GHCR_PAT }}
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
 
-      # Build dashboard image
-    #  - name: Build dashboard image
-    #    run: |
-    #      docker build -t ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest -f docker/Dockerfile docker/
+      # Build images
+      - name: Build indexer image
+        run: |
+          docker build -t ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0 -f docker/indexer/Dockerfile docker/indexer/
 
-      # Push dashboard image to GHCR
-    #  - name: Push Wazuh Dashboard image
-    #    run: docker push ghcr.io/ashbloom12/min-soc/wazuh-dashboard:latest
+      # Push images to GHCR
+      - name: Push Wazuh Indexer image
+        run: docker push ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
   # ---------------- SECURITY SCAN ----------------
   scan:
     needs: build
@@ -62,13 +62,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
       # Pull official images (specify a version tag if needed)
       - name: Pull Wazuh images
         run: |
           docker pull wazuh/wazuh-manager:4.12.0
-          docker pull wazuh/wazuh-indexer:4.12.0
           docker pull wazuh/wazuh-dashboard:4.12.0
-
+          docker pull ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
+      
       - name: Scan Wazuh Manager
         run: |
           trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-manager-report.json wazuh/wazuh-manager:4.12.0
@@ -76,8 +83,8 @@ jobs:
 
       - name: Scan Wazuh Indexer
         run: |
-          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-indexer-report.json wazuh/wazuh-indexer:4.12.0
-          trivy image --ignorefile ./trivy/.trivyignore --format table wazuh/wazuh-indexer:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-indexer-report.json ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format table ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
 
       - name: Scan Wazuh Dashboard
         run: |
@@ -112,7 +119,7 @@ jobs:
    
     env:
       WAZUH_MANAGER_IMAGE: wazuh/wazuh-manager:4.12.0
-      WAZUH_INDEXER_IMAGE: wazuh/wazuh-indexer:4.12.0
+      WAZUH_INDEXER_IMAGE: ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
       WAZUH_DASHBOARD_IMAGE: wazuh/wazuh-dashboard:4.12.0
       ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
       GHCR_TOKEN: ${{ secrets.GHCR_PAT }}
