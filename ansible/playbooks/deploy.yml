@@ -110,7 +110,7 @@
 
 # Disable HTTPS on Wazuh Dashboard
 - name: Disable HTTPS for Wazuh Dashboard
-  hosts: dashboard
+  hosts: node1
   become: true
   gather_facts: false
   tasks:
