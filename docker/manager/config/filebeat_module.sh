@@ -17,8 +17,10 @@ mkdir -p ${FILEBEAT_MODULE_DIR}
 
 # Download Wazuh Filebeat module from GitHub using the correct tag
 TMP_DIR=$(mktemp -d)
-git clone --depth 1 --branch "v${FILEBEAT_MODULE_VERSION}" https://github.com/wazuh/wazuh.git "${TMP_DIR}"
-cp -r "${TMP_DIR}/extensions/filebeat/module/wazuh" "${FILEBEAT_MODULE_DIR}/"
+git clone --depth 1 --branch "${FILEBEAT_MODULE_VERSION}" https://github.com/wazuh/wazuh.git "${TMP_DIR}"
+
+# Copy using the correct path
+cp -r "${TMP_DIR}/extensions/filebeat/modules/wazuh" "${FILEBEAT_MODULE_DIR}/"
 rm -rf "${TMP_DIR}"
 
 echo "Wazuh Filebeat module for version ${FILEBEAT_MODULE_VERSION} installed successfully."
