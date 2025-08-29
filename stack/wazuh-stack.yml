@@ -20,14 +20,13 @@ services:
   # ------------------------------
   wazuh-indexer:
     image: wazuh/wazuh-indexer:4.12.0
-    user: "0:0"
     environment:
       - cluster.name=wazuh-cluster
       - node.name=indexer
       - discovery.type=single-node
     volumes:
       - wazuh-indexer-data:/var/lib/wazuh-indexer
-      - /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates:/etc/wazuh-indexer/certs:ro
+      - wazuh-certs:/etc/wazuh-indexer/certs:ro
     networks:
       - wazuh-net
     deploy:
