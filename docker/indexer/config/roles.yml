@@ -134,13 +134,13 @@ wazuh_ui_user:
   hidden: false
   cluster_permissions: []
   index_permissions:
-  - index_patterns:
-    - "wazuh-*"
-    dls: ""
-    fls: []
-    masked_fields: []
-    allowed_actions:
-    - "read"
+    - index_patterns:
+        - "wazuh-*"
+      dls: ""
+      fls: []
+      masked_fields: []
+      allowed_actions:
+        - "read"
   tenant_permissions: []
   static: false
 
@@ -149,16 +149,16 @@ wazuh_ui_admin:
   hidden: false
   cluster_permissions: []
   index_permissions:
-  - index_patterns:
-    - "wazuh-*"
-    dls: ""
-    fls: []
-    masked_fields: []
-    allowed_actions:
-    - "read"
-    - "delete"
-    - "manage"
-    - "index"
+    - index_patterns:
+        - "wazuh-*"
+      dls: ""
+      fls: []
+      masked_fields: []
+      allowed_actions:
+        - "read"
+        - "delete"
+        - "manage"
+        - "index"
   tenant_permissions: []
   static: false
 
@@ -167,5 +167,5 @@ manage_ism:
   reserved: true
   hidden: false
   cluster_permissions:
-  - "manage_ism"
+    - "manage_ism"
   static: false
