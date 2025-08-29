@@ -62,6 +62,8 @@ services:
     environment:
       - ELASTICSEARCH_HOST=wazuh-indexer
       - ELASTICSEARCH_PORT=9200
+      # Disable HTTPS inside dashboard since Traefik handles it
+      - WAZUH_DASHBOARD_SSL_ENABLED=false
     networks:
       - traefik-public
       - wazuh-net
@@ -72,8 +74,6 @@ services:
       - "traefik.http.routers.wazuh-dashboard.tls=true"
       - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=5601"
     volumes:
-      - /opt/wazuh-dashboard-certs/dashboard-cert.pem:/etc/wazuh-dashboard/certs/dashboard-cert.pem:ro
-      - /opt/wazuh-dashboard-certs/dashboard-key.pem:/etc/wazuh-dashboard/certs/dashboard-key.pem:ro
     deploy:
       replicas: 1
       placement:

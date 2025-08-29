@@ -101,36 +101,6 @@
         username: "{{ lookup('env', 'GITHUB_ACTOR') }}"
         password: "{{ lookup('env', 'GHCR_TOKEN') }}"
 
-# Deploy Wazuh Stack
-- name: Deploy Wazuh Stack
-  hosts: dashboard
-  become: true
-  gather_facts: true
-  pre_tasks:
-    - name: Create certs directory for Wazuh Dashboard
-      file:
-        path: /opt/wazuh-dashboard-certs
-        state: directory
-        owner: root
-        group: root
-        mode: '0755'
-
-    - name: Copy Wazuh Dashboard certificate
-      copy:
-        content: "{{ traefik_certificate }}"
-        dest: /opt/wazuh-dashboard-certs/dashboard-cert.pem
-        owner: root
-        group: root
-        mode: '0644'
-
-    - name: Copy Wazuh Dashboard private key
-      copy:
-        content: "{{ traefik_private_key }}"
-        dest: /opt/wazuh-dashboard-certs/dashboard-key.pem
-        owner: root
-        group: root
-        mode: '0600'
-
   roles:
     - swarm-init    # initializes Swarm and sets join tokens
     - networks      # creates overlay networks
