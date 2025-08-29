@@ -1,23 +1,21 @@
-## variables
-REPOSITORY="packages-dev.wazuh.com/pre-release"
-WAZUH_TAG=$(curl --silent https://api.github.com/repos/wazuh/wazuh/git/refs/tags \
-              | grep '["]ref["]:' \
-              | sed -E 's/.*\"([^\"]+)\".*/\1/' \
-              | cut -c 11- \
-              | grep ^v${WAZUH_VERSION}$)
+#!/bin/bash
+set -e
 
-## check tag to use the correct repository
-if [[ -n "${WAZUH_TAG}" ]]; then
-  REPOSITORY="packages.wazuh.com/4.x"
-fi
+# Variables
+FILEBEAT_RPM_URL="https://artifacts.elastic.co/downloads/beats/filebeat/${FILEBEAT_CHANNEL}-${FILEBEAT_VERSION}-x86_64.rpm"
 
 # Install Filebeat RPM
-curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/${FILEBEAT_CHANNEL}-${FILEBEAT_VERSION}-x86_64.rpm
+curl -L -O $FILEBEAT_RPM_URL
 yum install -y ${FILEBEAT_CHANNEL}-${FILEBEAT_VERSION}-x86_64.rpm
 rm -f ${FILEBEAT_CHANNEL}-${FILEBEAT_VERSION}-x86_64.rpm
 
-# Download and extract Wazuh Filebeat module
-curl -f -sL https://${REPOSITORY}/filebeat/wazuh-${WAZUH_VERSION}.tar.gz -o /tmp/wazuh-module.tar.gz
+# Download Wazuh Filebeat module directly from GitHub
+TMP_DIR=$(mktemp -d)
+git clone --branch v${WAZUH_VERSION} --depth 1 https://github.com/wazuh/wazuh.git "$TMP_DIR"
+
+# Copy module to Filebeat directory
 mkdir -p /usr/share/filebeat/module
-tar -xzf /tmp/wazuh-module.tar.gz -C /usr/share/filebeat/module
-rm /tmp/wazuh-module.tar.gz
+cp -r "$TMP_DIR/extensions/filebeat/module/wazuh" /usr/share/filebeat/module/
+
+# Clean up
+rm -rf "$TMP_DIR"
