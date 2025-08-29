@@ -39,43 +39,21 @@ jobs:
         # Checks out your repository under $GITHUB_WORKSPACE, so your job can access it
         uses: actions/checkout@v4
         
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_PAT }}
-
-      - name: Generate Wazuh Indexer certificates
-        run: |
-          mkdir -p docker/indexer/certs
-          # Root CA
-          openssl req -x509 -nodes -days 365 \
-            -subj "/CN=wazuh-root-ca" \
-            -newkey rsa:4096 \
-            -keyout docker/indexer/certs/root-ca-key.pem \
-            -out docker/indexer/certs/root-ca.pem
-          # Indexer cert
-          openssl req -nodes -newkey rsa:4096 \
-            -subj "/CN=wazuh-indexer" \
-            -keyout docker/indexer/certs/indexer-key.pem \
-            -out docker/indexer/certs/indexer.csr
-          openssl x509 -req -in docker/indexer/certs/indexer.csr \
-            -CA docker/indexer/certs/root-ca.pem \
-            -CAkey docker/indexer/certs/root-ca-key.pem \
-            -CAcreateserial \
-            -out docker/indexer/certs/indexer.pem -days 365
+    #  - name: Log in to GitHub Container Registry
+    #    uses: docker/login-action@v3
+    #    with:
+    #      registry: ghcr.io
+    #      username: ${{ github.actor }}
+    #      password: ${{ secrets.GHCR_PAT }}        
 
       # Build images
-      - name: Build indexer image
-        run: |
-          docker build -t ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0 -f docker/indexer/Dockerfile docker/indexer/
-          # Cleanup
-          rm docker/indexer/certs/indexer.csr docker/indexer/certs/root-ca-key.pem docker/indexer/certs/root-ca.srl
+    #  - name: Build indexer image
+    #    run: |
+    #      docker build -t ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0 -f docker/indexer/Dockerfile docker/indexer/
 
       # Push images to GHCR
-      - name: Push Wazuh Indexer image
-        run: docker push ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
+    #  - name: Push Wazuh Indexer image
+    #    run: docker push ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
   # ---------------- SECURITY SCAN ----------------
   scan:
     needs: build
@@ -96,7 +74,7 @@ jobs:
         run: |
           docker pull wazuh/wazuh-manager:4.12.0
           docker pull wazuh/wazuh-dashboard:4.12.0
-          docker pull ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
+          docker pull wazuh/wazuh-indexer:4.12.0
       
       - name: Scan Wazuh Manager
         run: |
@@ -105,8 +83,8 @@ jobs:
 
       - name: Scan Wazuh Indexer
         run: |
-          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-indexer-report.json ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
-          trivy image --ignorefile ./trivy/.trivyignore --format table ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-indexer-report.json wazuh/wazuh-indexer:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format table wazuh/wazuh-indexer:4.12.0
 
       - name: Scan Wazuh Dashboard
         run: |
@@ -141,7 +119,7 @@ jobs:
    
     env:
       WAZUH_MANAGER_IMAGE: wazuh/wazuh-manager:4.12.0
-      WAZUH_INDEXER_IMAGE: ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
+      WAZUH_INDEXER_IMAGE: wazuh/wazuh-indexer:4.12.0
       WAZUH_DASHBOARD_IMAGE: wazuh/wazuh-dashboard:4.12.0
       ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
       GHCR_TOKEN: ${{ secrets.GHCR_PAT }}
