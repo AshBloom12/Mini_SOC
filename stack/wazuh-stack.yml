@@ -26,6 +26,7 @@ services:
       - cluster.name=wazuh-cluster
       - node.name=indexer
       - discovery.type=single-node
+    command: ["opensearch", "-Dopensearch.security.disabled=true"]
     volumes:
       - wazuh-indexer-data:/var/lib/wazuh-indexer
       - /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates:/etc/wazuh-indexer/certs:ro
