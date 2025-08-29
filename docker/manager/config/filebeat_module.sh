@@ -15,9 +15,9 @@ rm -f ${FILEBEAT_CHANNEL}-${FILEBEAT_VERSION}-x86_64.rpm
 # Prepare Filebeat module directory
 mkdir -p ${FILEBEAT_MODULE_DIR}
 
-# Download Wazuh Filebeat module from GitHub for 4.12.0
+# Download Wazuh Filebeat module from GitHub using the correct tag
 TMP_DIR=$(mktemp -d)
-git clone --branch "4.12.0" --depth 1 https://github.com/wazuh/wazuh.git "${TMP_DIR}"
+git clone --depth 1 --branch "v${FILEBEAT_MODULE_VERSION}" https://github.com/wazuh/wazuh.git "${TMP_DIR}"
 cp -r "${TMP_DIR}/extensions/filebeat/module/wazuh" "${FILEBEAT_MODULE_DIR}/"
 rm -rf "${TMP_DIR}"
 

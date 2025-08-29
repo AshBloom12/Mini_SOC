@@ -32,16 +32,12 @@ RUN bash /filebeat_module.sh
 RUN rm /filebeat_module.sh
 
 # 3. Download s6-overlay
-RUN curl -fL -o /tmp/s6-overlay-amd64.tar.gz \
+RUN curl -fL -o /tmp/s6-overlay-amd64.tar.xz \
     https://github.com/just-containers/s6-overlay/releases/download/${S6_VERSION}/s6-overlay-x86_64.tar.xz
 
-# 4. Verify the download
-RUN file /tmp/s6-overlay-amd64.tar.gz
-
-# 5. Extract s6-overlay
-RUN tar xzf /tmp/s6-overlay-amd64.tar.gz -C / --exclude="./bin" && \
-    tar xzf /tmp/s6-overlay-amd64.tar.gz -C /usr ./bin && \
-    rm /tmp/s6-overlay-amd64.tar.gz
+RUN tar xJf /tmp/s6-overlay-amd64.tar.xz -C / --exclude="./bin" && \
+    tar xJf /tmp/s6-overlay-amd64.tar.xz -C /usr ./bin && \
+    rm /tmp/s6-overlay-amd64.tar.xz
 
 # 6. Copy configuration
 COPY config/etc/ /etc/
