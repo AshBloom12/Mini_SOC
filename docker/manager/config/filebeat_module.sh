@@ -2,24 +2,24 @@
 set -e
 
 ## Variables
-REPOSITORY="packages-dev.wazuh.com/pre-release"
+WAZUH_VERSION="4.12.0"
+FILEBEAT_MODULE_DIR="/usr/share/filebeat/module"
+FILEBEAT_VERSION="${FILEBEAT_VERSION:-7.10.2}"
+FILEBEAT_CHANNEL="${FILEBEAT_CHANNEL:-filebeat-oss}"
+WAZUH_FILEBEAT_MODULE="wazuh-${WAZUH_VERSION}-filebeat-module.tar.gz"
+REPOSITORY="packages.wazuh.com/4.x"
 
-# Determine the Wazuh tag for the version
-WAZUH_TAG=$(curl --silent https://api.github.com/repos/wazuh/wazuh/git/refs/tags \
-               | grep '["]ref["]:' \
-               | sed -E 's/.*\"([^\"]+)\".*/\1/' \
-               | cut -c 11- \
-               | grep ^v${WAZUH_VERSION}$)
-
-# Use production repository if tag exists
-if [[ -n "${WAZUH_TAG}" ]]; then
-  REPOSITORY="packages.wazuh.com/4.x"
-fi
-
-# Install the correct Filebeat RPM from Wazuh repo
+# Install Filebeat RPM from official Wazuh site
+curl -L -O https://packages.wazuh.com/4.x/yum/${FILEBEAT_MODULE_DIR}/../filebeat-${FILEBEAT_VERSION}-1.x86_64.rpm || \
 curl -L -O https://packages.wazuh.com/4.x/yum/filebeat-${FILEBEAT_VERSION}-1.x86_64.rpm
+
 yum install -y filebeat-${FILEBEAT_VERSION}-1.x86_64.rpm
 rm -f filebeat-${FILEBEAT_VERSION}-1.x86_64.rpm
 
-# Extract Wazuh Filebeat module tarball
-curl -s https://${REPOSITORY}/filebeat/${WAZUH_FILEBEAT_MODULE} | tar -xvz -C /usr/share/filebeat/module
+# Prepare Filebeat module directory
+mkdir -p ${FILEBEAT_MODULE_DIR}
+
+# Download Wazuh Filebeat module tarball and extract it
+curl -L https://${REPOSITORY}/filebeat/${WAZUH_FILEBEAT_MODULE} | tar -xvz -C ${FILEBEAT_MODULE_DIR}
+
+echo "Wazuh Filebeat module for version ${WAZUH_VERSION} installed successfully."
