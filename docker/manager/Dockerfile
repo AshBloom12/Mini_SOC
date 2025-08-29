@@ -13,18 +13,17 @@ ARG FILEBEAT_VERSION=7.10.2
 ARG WAZUH_FILEBEAT_MODULE
 ARG S6_VERSION="v3.2.1.0"
 
-# Install dependencies and add Wazuh repo
-RUN yum install -y curl xz gnupg tar gzip openssl findutils procps && \
-    rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH && \
-    tee /etc/yum.repos.d/wazuh.repo <<'EOF'
-[wazuh]
-name=Wazuh repo
-baseurl=https://packages.wazuh.com/4.x/yum/
-gpgcheck=1
-gpgkey=https://packages.wazuh.com/key/GPG-KEY-WAZUH
-enabled=1
-EOF
-RUN yum clean all
+# Install dependencies
+RUN dnf install -y curl xz gnupg tar gzip openssl findutils procps && dnf clean all
+
+# Add Wazuh repo
+RUN rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH && \
+    echo "[wazuh]" > /etc/yum.repos.d/wazuh.repo && \
+    echo "name=Wazuh repo" >> /etc/yum.repos.d/wazuh.repo && \
+    echo "baseurl=https://packages.wazuh.com/4.x/yum/" >> /etc/yum.repos.d/wazuh.repo && \
+    echo "gpgcheck=1" >> /etc/yum.repos.d/wazuh.repo && \
+    echo "gpgkey=https://packages.wazuh.com/key/GPG-KEY-WAZUH" >> /etc/yum.repos.d/wazuh.repo && \
+    echo "enabled=1" >> /etc/yum.repos.d/wazuh.repo
 
 # Copy helper scripts
 COPY config/check_repository.sh / 
@@ -34,7 +33,7 @@ COPY config/permanent_data.env config/permanent_data.sh /
 RUN chmod +x /check_repository.sh && /bin/bash /check_repository.sh
 
 # Install Wazuh Manager
-RUN yum install -y wazuh-manager-${WAZUH_VERSION}-${WAZUH_TAG_REVISION} && yum clean all
+RUN dnf install -y wazuh-manager-${WAZUH_VERSION}-${WAZUH_TAG_REVISION} && dnf clean all
 
 # Install Filebeat module safely
 RUN chmod +x /filebeat_module.sh && /bin/bash /filebeat_module.sh && rm /filebeat_module.sh
