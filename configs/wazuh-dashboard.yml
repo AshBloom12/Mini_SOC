@@ -1,0 +1,3 @@
+server.ssl.enabled: false
+# server.ssl.key: /etc/wazuh-dashboard/certs/privkey.pem
+# server.ssl.certificate: /etc/wazuh-dashboard/certs/fullchain.pem

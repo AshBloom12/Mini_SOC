@@ -108,34 +108,17 @@
     - traefik       # deploys Traefik reverse proxy with TLS/ACME
     - deploy-stack  # deploys/updates stack with rollback
 
-# Disable HTTPS on Wazuh Dashboard
-- name: Disable HTTPS for Wazuh Dashboard
+- name: Deploy custom Wazuh dashboard config
   hosts: node1
   become: true
-  gather_facts: false
   tasks:
-    - name: Disable SSL in Wazuh dashboard configuration
-      ansible.builtin.lineinfile:
-        path: /etc/wazuh-dashboard/wazuh-dashboard.yml
-        regexp: '^server.ssl.enabled:'
-        line: 'server.ssl.enabled: false'
-        backup: yes
+    - name: Copy wazuh-dashboard.yml from project to host
+      copy:
+        src: ./configs/wazuh-dashboard.yml
+        dest: /home/ubuntu/wazuh-dashboard.yml
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
 
-    - name: Comment out SSL key path
-      ansible.builtin.lineinfile:
-        path: /etc/wazuh-dashboard/wazuh-dashboard.yml
-        regexp: '^server.ssl.key:'
-        line: '# server.ssl.key: /etc/wazuh-dashboard/certs/dashboard-key.pem'
-        backup: yes
-
-    - name: Comment out SSL certificate path
-      ansible.builtin.lineinfile:
-        path: /etc/wazuh-dashboard/wazuh-dashboard.yml
-        regexp: '^server.ssl.certificate:'
-        line: '# server.ssl.certificate: /etc/wazuh-dashboard/certs/dashboard-cert.pem'
-        backup: yes
-
-    - name: Restart Wazuh Dashboard service
-      ansible.builtin.systemd:
-        name: wazuh-dashboard
-        state: restarted
+    - name: Force update Wazuh dashboard service
+      shell: docker service update --force wazuh-stack_wazuh-dashboard
