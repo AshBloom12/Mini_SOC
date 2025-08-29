@@ -198,7 +198,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/mini-soc.pem -o StrictHostKeyChecking=no ubuntu@10.0.2.51 "
             sudo chown -R 1000:1000 /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates
-            sudo chmod 600 /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates/*.pem
+            sudo find /home/ubuntu/config/wazuh_indexer/config/wazuh-certificates -type f -exec chmod 600 {} \;
           "
 
       - name: Run Ansible deploy playbook
