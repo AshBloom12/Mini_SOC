@@ -204,7 +204,7 @@ jobs:
       - name: Run Ansible deploy playbook
         run: |
           echo -n "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
-          ansible-playbook ansible/playbooks/deploy.yml --vault-password-file /tmp/vault_pass.txt
+          ansible-playbook ansible/playbooks/deploy.yml --vault-password-file /tmp/vault_pass.txt -vvv
           rm -f /tmp/vault_pass.txt
 
       - name: Verify services in Swarm
