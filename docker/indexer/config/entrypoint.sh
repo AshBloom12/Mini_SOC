@@ -11,7 +11,7 @@ export JAVA_HOME=${INSTALLATION_DIR}/jdk
 export DISCOVERY=$(grep -oP "(?<=discovery.type: ).*" ${OPENSEARCH_PATH_CONF}/opensearch.yml)
 
 # --- Certificates (aligned with opensearch.yml) ---
-CERTS_DIR=/etc/wazuh-indexer/certs
+CERTS_DIR=${OPENSEARCH_PATH_CONF}/certs
 export CACERT=${CERTS_DIR}/root-ca.pem
 export CERT=${CERTS_DIR}/indexer.pem
 export KEY=${CERTS_DIR}/indexer-key.pem
