@@ -21,38 +21,38 @@ mkdir -p "${OPENSEARCH_PATH_CONF}" "${CERTS_DIR}"
 chown -R 1000:0 "${OPENSEARCH_PATH_CONF}" "${CERTS_DIR}"
 chmod 700 "${CERTS_DIR}"
 
-# --- Generate Wazuh certificates if missing ---
+# --- Generate Wazuh certificates if plugin is enabled ---
 CERT_TOOL=/wazuh-certs-tool.sh
 CONFIG_FILE=/config/certs.yml
 
-if [[ -f ${CONFIG_FILE} ]]; then
-    cp ${CONFIG_FILE} /config.yml
-    echo "Generating certificates..."
-    source ${CERT_TOOL} -A
+if [[ "${DISABLE_SECURITY_PLUGIN}" != "true" ]]; then
+    if [[ -f ${CONFIG_FILE} ]]; then
+        echo "Generating certificates..."
+        source ${CERT_TOOL} -A
 
-    echo "Copying certificates to Wazuh Indexer certs folder"
-    cp /wazuh-certificates/* "${CERTS_DIR}/"
+        echo "Copying certificates to Wazuh Indexer certs folder"
+        cp /wazuh-certificates/* "${CERTS_DIR}/"
 
-    echo "Fixing permissions"
-    chmod 500 "${CERTS_DIR}"
-    chmod 400 "${CERTS_DIR}"/*
-    chown -R 1000:1000 "${CERTS_DIR}"
-fi
-
-# --- Copy Docker secrets if available ---
-for secret in indexer-key indexer-cert root-ca; do
-    if [[ -f /run/secrets/$secret ]]; then
-        case $secret in
-            indexer-key)   cp /run/secrets/$secret "${KEY}" ;;
-            indexer-cert)  cp /run/secrets/$secret "${CERT}" ;;
-            root-ca)       cp /run/secrets/$secret "${CACERT}" ;;
-        esac
+        echo "Fixing permissions"
+        chmod 400 "${CERTS_DIR}"/*
+        chown -R 1000:1000 "${CERTS_DIR}"
     fi
-done
 
-# Fix ownership/permissions after secret copy
-chown -R 1000:0 "${CERTS_DIR}"
-chmod 600 "${CERTS_DIR}"/*.pem || true
+    # --- Copy Docker secrets if available ---
+    for secret in indexer-key indexer-cert root-ca; do
+        if [[ -f /run/secrets/$secret ]]; then
+            case $secret in
+                indexer-key)   cp /run/secrets/$secret "${KEY}" ;;
+                indexer-cert)  cp /run/secrets/$secret "${CERT}" ;;
+                root-ca)       cp /run/secrets/$secret "${CACERT}" ;;
+            esac
+        fi
+    done
+
+    # Fix ownership/permissions after secret copy
+    chown -R 1000:0 "${CERTS_DIR}"
+    chmod 600 "${CERTS_DIR}"/*.pem || true
+fi
 
 # --- Function to run as UID 1000 if root ---
 run_as_wazuh_user() {
