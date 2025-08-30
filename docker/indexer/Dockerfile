@@ -51,28 +51,24 @@ WORKDIR $INSTALL_DIR
 # Copy entrypoint and securityadmin scripts
 COPY config/entrypoint.sh /entrypoint.sh
 COPY config/securityadmin.sh /securityadmin.sh
-RUN chmod 700 /entrypoint.sh /securityadmin.sh && chown 1000:1000 /entrypoint.sh /securityadmin.sh
+RUN chmod 700 /entrypoint.sh /securityadmin.sh && chown 1000:0 /*.sh
 
-# Copy Wazuh Indexer binaries from builder
-COPY --from=builder --chown=1000:1000 /usr/share/wazuh-indexer /usr/share/wazuh-indexer
-
-# ---------------- Config & certs ----------------
-# Ensure config folder exists and has correct ownership
-RUN mkdir -p /usr/share/wazuh-indexer/config && \
-    chown -R 1000:1000 /usr/share/wazuh-indexer/config && \
-    chmod 755 /usr/share/wazuh-indexer/config
-
-# Ensure certs folder exists (for Docker secrets)
-RUN mkdir -p /usr/share/wazuh-indexer/config/certs && \
-    chown -R 1000:1000 /usr/share/wazuh-indexer/config/certs && \
+# --- Ensure config and certs directories exist with proper permissions ---
+RUN mkdir -p /usr/share/wazuh-indexer/config \
+    /usr/share/wazuh-indexer/config/certs && \
+    chown -R 1000:0 /usr/share/wazuh-indexer/config && \
     chmod 700 /usr/share/wazuh-indexer/config/certs
 
-# Create runtime directories
-RUN mkdir -p /var/lib/wazuh-indexer /usr/share/wazuh-indexer/logs /run/wazuh-indexer /var/log/wazuh-indexer && \
-    chown -R 1000:1000 /var/lib/wazuh-indexer /usr/share/wazuh-indexer/logs /run/wazuh-indexer /var/log/wazuh-indexer && \
-    chmod 700 /usr/share/wazuh-indexer /usr/share/wazuh-indexer/logs
+# Copy Wazuh Indexer binaries and configuration from builder stage
+COPY --from=builder --chown=1000:0 /usr/share/wazuh-indexer /usr/share/wazuh-indexer
+COPY --from=builder --chown=1000:0 /etc/wazuh-indexer /usr/share/wazuh-indexer/config
 
-# Run as non-root user
+# Create runtime directories for logs, data, and temporary files
+RUN mkdir -p /var/lib/wazuh-indexer /usr/share/wazuh-indexer/logs /run/wazuh-indexer /var/log/wazuh-indexer && \
+    chown -R 1000:0 /var/lib/wazuh-indexer /usr/share/wazuh-indexer/logs /run/wazuh-indexer /var/log/wazuh-indexer && \
+    chmod 700 /usr/share/wazuh-indexer
+
+# Switch to non-root user
 USER wazuh-indexer
 
 # Expose service port

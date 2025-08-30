@@ -169,21 +169,26 @@ jobs:
 
       - name: Generate self-signed certs
         run: |
-          mkdir -p certs/indexer
+          mkdir -p certs/indexer certs/dashboard
           bash scripts/generate-certs.sh certs/indexer
+          bash scripts/generate-certs.sh certs/dashboard  # if needed for dashboard
 
       - name: Copy certs to Swarm manager
         run: |
           scp -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no -r certs ubuntu@10.0.1.191:/home/ubuntu/
 
-      - name: Create Docker secrets
+      - name: Create Docker secrets on Swarm manager
         run: |
           ssh -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no ubuntu@10.0.1.191 'bash -s' <<'EOF'
-          docker secret create indexer-key /home/ubuntu/certs/indexer/indexer-key.pem || true
-          docker secret create indexer-cert /home/ubuntu/certs/indexer/indexer.pem || true
-          docker secret create root-ca /home/ubuntu/certs/indexer/root-ca.pem || true
-          docker secret create dashboard-key /home/ubuntu/certs/dashboard/dashboard-key.pem || true
-          docker secret create dashboard-cert /home/ubuntu/certs/dashboard/dashboard.pem || true
+          # Ensure old secrets are removed first to avoid conflicts
+          docker secret rm indexer-key indexer-cert root-ca dashboard-key dashboard-cert || true
+
+          # Create secrets from uploaded certs
+          docker secret create indexer-key /home/ubuntu/certs/indexer/indexer-key.pem
+          docker secret create indexer-cert /home/ubuntu/certs/indexer/indexer.pem
+          docker secret create root-ca /home/ubuntu/certs/indexer/root-ca.pem
+          docker secret create dashboard-key /home/ubuntu/certs/dashboard/dashboard-key.pem
+          docker secret create dashboard-cert /home/ubuntu/certs/dashboard/dashboard.pem
           EOF
 
       - name: Pre-flight ping to all nodes
