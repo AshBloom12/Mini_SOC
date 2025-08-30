@@ -27,6 +27,10 @@ services:
     image: ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
     volumes:
       - wazuh-indexer-data:/var/lib/wazuh-indexer
+      - ./config/wazuh_indexer/opensearch.yml:/usr/share/wazuh-indexer/opensearch.yml:ro
+      - ./config/wazuh_indexer/internal_users.yml:/usr/share/wazuh-indexer/plugins/opensearch-security/securityconfig/internal_users.yml:ro
+      - ./config/wazuh_indexer/roles.yml:/usr/share/wazuh-indexer/plugins/opensearch-security/securityconfig/roles.yml:ro
+      - ./config/wazuh_indexer/roles_mapping.yml:/usr/share/wazuh-indexer/plugins/opensearch-security/securityconfig/roles_mapping.yml:ro
     networks:
       - wazuh-net
     secrets:
@@ -36,6 +40,7 @@ services:
         target: /usr/share/wazuh-indexer/config/certs/indexer.pem
       - source: root-ca
         target: /usr/share/wazuh-indexer/config/certs/root-ca.pem
+    entrypoint: ["/usr/share/wazuh-indexer/entrypoint.sh"]
     deploy:
       replicas: 1
       placement:

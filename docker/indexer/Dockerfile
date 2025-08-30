@@ -60,7 +60,6 @@ RUN mkdir -p /usr/share/wazuh-indexer/config/certs && \
 
 # Copy Wazuh Indexer binaries and configuration from builder stage
 COPY --from=builder --chown=1000:0 /usr/share/wazuh-indexer /usr/share/wazuh-indexer
-# COPY --from=builder --chown=1000:0 /etc/wazuh-indexer /usr/share/wazuh-indexer/config
 
 # Create runtime directories for logs, data, and temporary files
 RUN mkdir -p /var/lib/wazuh-indexer /usr/share/wazuh-indexer/logs /run/wazuh-indexer /var/log/wazuh-indexer && \
