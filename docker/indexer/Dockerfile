@@ -48,12 +48,13 @@ RUN getent group $GROUP || groupadd -r -g 1000 $GROUP && \
 
 WORKDIR $INSTALL_DIR
 
-# Copy entrypoint and securityadmin scripts
+# Copy entrypoint, securityadmin, and certificate tool scripts
 COPY config/entrypoint.sh /entrypoint.sh
 COPY config/securityadmin.sh /securityadmin.sh
-RUN chmod 700 /entrypoint.sh /securityadmin.sh && chown 1000:0 /*.sh
+COPY config/wazuh-certs-tool.sh /wazuh-certs-tool.sh
+RUN chmod 700 /entrypoint.sh /securityadmin.sh /wazuh-certs-tool.sh && chown 1000:0 /*.sh
 
-# --- Ensure config and certs directories exist with proper permissions ---
+# Ensure config and certs directories exist with proper permissions
 RUN mkdir -p /usr/share/wazuh-indexer/config/certs && \
     chown -R 1000:0 /usr/share/wazuh-indexer/config && \
     chmod 700 /usr/share/wazuh-indexer/config/certs

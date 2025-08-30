@@ -21,29 +21,45 @@ mkdir -p "${OPENSEARCH_PATH_CONF}" "${CERTS_DIR}"
 chown -R 1000:0 "${OPENSEARCH_PATH_CONF}" "${CERTS_DIR}"
 chmod 700 "${CERTS_DIR}"
 
-# --- Copy Docker secrets if running as root ---
-if [[ "$(id -u)" == "0" ]]; then
-    for secret in indexer-key indexer-cert root-ca; do
-        if [[ -f /run/secrets/$secret ]]; then
-            case $secret in
-                indexer-key) cp /run/secrets/$secret "${KEY}" ;;
-                indexer-cert) cp /run/secrets/$secret "${CERT}" ;;
-                root-ca) cp /run/secrets/$secret "${CACERT}" ;;
-            esac
-        fi
-    done
+# --- Generate Wazuh certificates if missing ---
+CERT_TOOL=/wazuh-certs-tool.sh
+CONFIG_FILE=/config/certs.yml
 
-    # Set correct ownership and permissions
-    chown -R 1000:0 "${CERTS_DIR}"
-    chmod 600 "${CERTS_DIR}"/*.pem || true
+if [[ -f ${CONFIG_FILE} ]]; then
+    cp ${CONFIG_FILE} /config.yml
+    echo "Generating certificates..."
+    source ${CERT_TOOL} -A
+
+    echo "Copying certificates to Wazuh Indexer certs folder"
+    cp /wazuh-certificates/* "${CERTS_DIR}/"
+
+    echo "Fixing permissions"
+    chmod 500 "${CERTS_DIR}"
+    chmod 400 "${CERTS_DIR}"/*
+    chown -R 1000:1000 "${CERTS_DIR}"
 fi
+
+# --- Copy Docker secrets if available ---
+for secret in indexer-key indexer-cert root-ca; do
+    if [[ -f /run/secrets/$secret ]]; then
+        case $secret in
+            indexer-key)   cp /run/secrets/$secret "${KEY}" ;;
+            indexer-cert)  cp /run/secrets/$secret "${CERT}" ;;
+            root-ca)       cp /run/secrets/$secret "${CACERT}" ;;
+        esac
+    fi
+done
+
+# Fix ownership/permissions after secret copy
+chown -R 1000:0 "${CERTS_DIR}"
+chmod 600 "${CERTS_DIR}"/*.pem || true
 
 # --- Function to run as UID 1000 if root ---
 run_as_wazuh_user() {
     if [[ "$(id -u)" == "0" ]]; then
-        exec su-exec 1000:0 "$@"
+        exec chroot --userspec=1000:0 / "${@}"
     else
-        exec "$@"
+        exec "${@}"
     fi
 }
 
@@ -76,5 +92,6 @@ if [[ "$(id -u)" == "0" && -n "$TAKE_FILE_OWNERSHIP" ]]; then
     chown -R 1000:0 /usr/share/wazuh-indexer/{data,logs}
 fi
 
-# Start Wazuh Indexer
+# --- Start Wazuh Indexer ---
+echo "Starting Wazuh Indexer..."
 run_as_wazuh_user ${INSTALLATION_DIR}/bin/opensearch <<<"$KEYSTORE_PASSWORD"
