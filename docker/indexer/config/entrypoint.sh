@@ -21,27 +21,29 @@ mkdir -p "${OPENSEARCH_PATH_CONF}" "${CERTS_DIR}"
 chown -R 1000:0 "${OPENSEARCH_PATH_CONF}" "${CERTS_DIR}"
 chmod 700 "${CERTS_DIR}"
 
-# --- Copy Docker secrets if available ---
-for secret in indexer-key indexer-cert root-ca; do
-    if [[ -f /run/secrets/$secret ]]; then
-        case $secret in
-            indexer-key)   cp /run/secrets/$secret "${KEY}" ;;
-            indexer-cert)  cp /run/secrets/$secret "${CERT}" ;;
-            root-ca)       cp /run/secrets/$secret "${CACERT}" ;;
-        esac
-    fi
-done
+# --- Copy Docker secrets if running as root ---
+if [[ "$(id -u)" == "0" ]]; then
+    for secret in indexer-key indexer-cert root-ca; do
+        if [[ -f /run/secrets/$secret ]]; then
+            case $secret in
+                indexer-key) cp /run/secrets/$secret "${KEY}" ;;
+                indexer-cert) cp /run/secrets/$secret "${CERT}" ;;
+                root-ca) cp /run/secrets/$secret "${CACERT}" ;;
+            esac
+        fi
+    done
 
-# Fix ownership/permissions
-chown -R 1000:0 "${CERTS_DIR}"
-chmod 600 "${CERTS_DIR}"/*.pem || true
+    # Set correct ownership and permissions
+    chown -R 1000:0 "${CERTS_DIR}"
+    chmod 600 "${CERTS_DIR}"/*.pem || true
+fi
 
 # --- Function to run as UID 1000 if root ---
 run_as_wazuh_user() {
     if [[ "$(id -u)" == "0" ]]; then
-        exec chroot --userspec=1000:0 / "${@}"
+        exec su-exec 1000:0 "$@"
     else
-        exec "${@}"
+        exec "$@"
     fi
 }
 
@@ -74,28 +76,5 @@ if [[ "$(id -u)" == "0" && -n "$TAKE_FILE_OWNERSHIP" ]]; then
     chown -R 1000:0 /usr/share/wazuh-indexer/{data,logs}
 fi
 
-echo "[Entrypoint] Starting Wazuh Indexer..."
-${INSTALLATION_DIR}/bin/opensearch &
-
-# --- Wait until OpenSearch is up ---
-echo "[Entrypoint] Waiting for OpenSearch API..."
-until curl -s --insecure https://localhost:9200 -u admin:admin > /dev/null; do
-  sleep 5
-done
-echo "[Entrypoint] OpenSearch is up."
-
-# --- Initialize security index if missing ---
-if ! curl -s --insecure -u admin:admin https://localhost:9200/_cat/indices/.opendistro_security?h=index | grep -q ".opendistro_security"; then
-  echo "[Entrypoint] Bootstrapping OpenSearch Security plugin..."
-  ${INSTALLATION_DIR}/plugins/opensearch-security/tools/securityadmin.sh \
-    -cd ${INSTALLATION_DIR}/plugins/opensearch-security/securityconfig/ \
-    -icl -nhnv \
-    -cacert ${CACERT} \
-    -cert ${CERT} \
-    -key ${KEY}
-else
-  echo "[Entrypoint] Security index already exists. Skipping bootstrap."
-fi
-
-# Bring OpenSearch to foreground
-wait
+# Start Wazuh Indexer
+run_as_wazuh_user ${INSTALLATION_DIR}/bin/opensearch <<<"$KEYSTORE_PASSWORD"
