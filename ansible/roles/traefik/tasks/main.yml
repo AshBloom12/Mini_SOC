@@ -3,7 +3,6 @@
     name: "{{ traefik_network }}"
     driver: overlay
     scope: swarm
-    attachable: true
   when: hostvars[inventory_hostname].role == "dashboard"
 
 - name: Ensure Traefik config directory exists
