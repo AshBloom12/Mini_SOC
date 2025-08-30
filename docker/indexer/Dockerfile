@@ -16,7 +16,7 @@ gpgkey=https://packages.wazuh.com/key/GPG-KEY-WAZUH\n\
 enabled=1" > /etc/yum.repos.d/wazuh.repo
 
 # Copy repository check script (optional)
-COPY config/check_repository.sh /
+COPY config/check_repository.sh / 
 RUN chmod 775 /check_repository.sh && source /check_repository.sh
 
 # Install Wazuh Indexer
@@ -67,7 +67,11 @@ COPY --from=builder --chown=1000:1000 /etc/wazuh-indexer /usr/share/wazuh-indexe
 RUN mkdir -p /var/lib/wazuh-indexer /usr/share/wazuh-indexer/logs /run/wazuh-indexer /var/log/wazuh-indexer && \
     chown -R 1000:1000 /var/lib/wazuh-indexer /usr/share/wazuh-indexer/logs /run/wazuh-indexer /var/log/wazuh-indexer && \
     chmod 700 /usr/share/wazuh-indexer /usr/share/wazuh-indexer/config && \
-    chmod 600 /usr/share/wazuh-indexer/config/jvm.options /usr/share/wazuh-indexer/config/opensearch.yml
+    chmod 600 /usr/share/wazuh-indexer/config/jvm.options /usr/share/wazuh-indexer/config/opensearch.yml && \
+    # ---------------- Docker secrets folder ----------------
+    mkdir -p /etc/wazuh-indexer/certs && \
+    chown root:root /etc/wazuh-indexer/certs && \
+    chmod 700 /etc/wazuh-indexer/certs
 
 # Run as non-root user
 USER wazuh-indexer
