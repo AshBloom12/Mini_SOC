@@ -67,7 +67,10 @@ RUN mkdir -p /var/lib/wazuh-indexer /usr/share/wazuh-indexer/logs /run/wazuh-ind
     chmod 600 /usr/share/wazuh-indexer/config/jvm.options /usr/share/wazuh-indexer/config/opensearch.yml
 
 # ---------------- Docker secrets folder ----------------
-# Ensure the directory exists so Docker secrets can mount here
+# Ensure the config directory exists so Docker secrets can mount here
+RUN mkdir -p /usr/share/wazuh-indexer/config && \
+    chown -R 1000:1000 /usr/share/wazuh-indexer/config
+# Ensure the certs directory exists so Docker secrets can mount here
 RUN mkdir -p /usr/share/wazuh-indexer/config/certs && \
     chown -R 1000:1000 /usr/share/wazuh-indexer/config/certs && \
     chmod 700 /usr/share/wazuh-indexer/config/certs
