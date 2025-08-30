@@ -106,24 +106,24 @@ jobs:
       # Pull official images (specify a version tag if needed)
       - name: Pull Wazuh images
         run: |
-          docker pull wazuh/wazuh-manager:4.12.0
-          docker pull wazuh/wazuh-dashboard:4.12.0
-          docker pull wazuh/wazuh-indexer:4.12.0
-      
+          docker pull ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0
+          docker pull ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0
+          docker pull ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
+
       - name: Scan Wazuh Manager
         run: |
-          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-manager-report.json wazuh/wazuh-manager:4.12.0
-          trivy image --ignorefile ./trivy/.trivyignore --format table wazuh/wazuh-manager:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-manager-report.json ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format table ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0
 
       - name: Scan Wazuh Indexer
         run: |
-          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-indexer-report.json wazuh/wazuh-indexer:4.12.0
-          trivy image --ignorefile ./trivy/.trivyignore --format table wazuh/wazuh-indexer:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-indexer-report.json ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format table ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
 
       - name: Scan Wazuh Dashboard
         run: |
-          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-dashboard-report.json wazuh/wazuh-dashboard:4.12.0
-          trivy image --ignorefile ./trivy/.trivyignore --format table wazuh/wazuh-dashboard:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-dashboard-report.json ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format table ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0
 
       # Always upload reports, even if scan fails
       - name: Upload Trivy reports as artifacts
