@@ -20,6 +20,8 @@ services:
     image: wazuh/wazuh-indexer:4.12.0
     networks:
       - wazuh-net
+    environment:
+      - OPENSEARCH_HTTP_SSL_ENABLED=false   # disable SSL to avoid certificate issues
     volumes:
       - wazuh-indexer-data:/var/lib/wazuh-indexer
     deploy:
@@ -57,6 +59,8 @@ services:
     environment:
       - ELASTICSEARCH_HOST=wazuh-indexer
       - ELASTICSEARCH_PORT=9200
+      - WAZUH_MANAGER_HOST=wazuh-manager
+      - WAZUH_MANAGER_PORT=55000
     networks:
       - wazuh-net
       - traefik-public

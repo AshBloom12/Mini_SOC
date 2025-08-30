@@ -21,17 +21,6 @@ secrets:
     external: true
     name: "{{ secret_names.dashboard_tls_crt }}"
 
-  # Internal TLS for Indexer
-  indexer_key:
-    external: true
-    name: indexer-key
-  indexer_cert:
-    external: true
-    name: indexer-cert
-  root_ca:
-    external: true
-    name: root-ca
-
 services:
   # ---------------- Wazuh Manager ----------------
   wazuh-manager:
@@ -48,52 +37,33 @@ services:
     environment:
       WAZUH_API_USER_FILE: "/run/secrets/wazuh_api_user"
       WAZUH_API_PASSWORD_FILE: "/run/secrets/wazuh_api_password"
+      ELASTICSEARCH_HOST: "wazuh-indexer"
+      ELASTICSEARCH_PORT: 9200
     deploy:
       replicas: 1
       placement:
         constraints:
           - node.labels.role == worker
-      update_config:
-        parallelism: 1
-        delay: 10s
-        failure_action: rollback
-      rollback_config:
-        parallelism: 1
-        delay: 10s
 
   # ---------------- Wazuh Indexer ----------------
   wazuh-indexer:
     image: "{{ wazuh_image_indexer }}"
     networks:
       - wazuh-net
-    secrets:
-      - source: indexer_key
-        target: indexer-key.pem
-        mode: 0400
-      - source: indexer_cert
-        target: indexer.pem
-        mode: 0444
-      - source: root_ca
-        target: root-ca.pem
-        mode: 0444
+    environment:
+      OPENSEARCH_HTTP_SSL_ENABLED: false  # Disable internal SSL
     deploy:
       replicas: 1
       placement:
         constraints:
           - node.labels.role == worker
-      update_config:
-        parallelism: 1
-        delay: 10s
-        failure_action: rollback
-      rollback_config:
-        parallelism: 1
-        delay: 10s
 
   # ---------------- Wazuh Dashboard ----------------
   wazuh-dashboard:
     image: "{{ wazuh_image_dashboard }}"
     networks:
       - wazuh-net
+      - traefik-public
     secrets:
       - source: dashboard_tls_key
         target: dashboard_tls_key
@@ -112,15 +82,17 @@ services:
       TLS_CRT_FILE: "/run/secrets/dashboard_tls_crt"
       WAZUH_API_USER_FILE: "/run/secrets/wazuh_api_user"
       WAZUH_API_PASSWORD_FILE: "/run/secrets/wazuh_api_password"
+      ELASTICSEARCH_HOST: "wazuh-indexer"
+      ELASTICSEARCH_PORT: 9200
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wazuh-dashboard.rule=Host(`{{ public_ip }}`)"
+      - "traefik.http.routers.wazuh-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.wazuh-dashboard.tls=true"
+      - "traefik.http.routers.wazuh-dashboard.tls.certresolver=selfsigned"
+      - "traefik.http.services.wazuh-dashboard.loadbalancer.server.port=5601"
     deploy:
       replicas: 1
       placement:
         constraints:
           - node.labels.role == dashboard
-      update_config:
-        parallelism: 1
-        delay: 10s
-        failure_action: rollback
-      rollback_config:
-        parallelism: 1
-        delay: 10s
