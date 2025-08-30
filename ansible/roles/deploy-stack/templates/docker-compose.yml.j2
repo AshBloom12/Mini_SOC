@@ -51,7 +51,7 @@ services:
     networks:
       - wazuh-net
     environment:
-      OPENSEARCH_HTTP_SSL_ENABLED: false  # Disable internal SSL
+      OPENSEARCH_HTTP_SSL_ENABLED: "{{ 'false' }}"
     deploy:
       replicas: 1
       placement:
