@@ -15,6 +15,13 @@ export CACERT=${OPENSEARCH_PATH_CONF}/certs/root-ca.pem
 export CERT=${OPENSEARCH_PATH_CONF}/certs/indexer.pem
 export KEY=${OPENSEARCH_PATH_CONF}/certs/indexer-key.pem
 
+# --- Fix permissions for Docker secrets ---
+if [[ "$(id -u)" == "0" ]]; then
+    mkdir -p ${OPENSEARCH_PATH_CONF}/certs
+    chown -R 1000:0 ${OPENSEARCH_PATH_CONF}/certs
+    chmod 600 ${OPENSEARCH_PATH_CONF}/certs/*.pem
+fi
+
 run_as_other_user_if_needed() {
   if [[ "$(id -u)" == "0" ]]; then
     # Drop to UID 1000 / GID 0
@@ -41,7 +48,7 @@ source /usr/share/wazuh-indexer/bin/opensearch-env-from-file
 if [[ -f bin/opensearch-users ]] && [[ -n "$INDEXER_PASSWORD" ]]; then
     [[ -f /usr/share/wazuh-indexer/opensearch.keystore ]] || \
       (run_as_other_user_if_needed opensearch-keystore create)
-    
+
     if ! (run_as_other_user_if_needed opensearch-keystore has-passwd --silent); then
         if ! (run_as_other_user_if_needed opensearch-keystore list | grep -q '^bootstrap.password$'); then
             (run_as_other_user_if_needed echo "$INDEXER_PASSWORD" | opensearch-keystore add -x 'bootstrap.password')
