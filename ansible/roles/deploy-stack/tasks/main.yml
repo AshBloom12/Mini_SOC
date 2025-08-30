@@ -21,16 +21,16 @@
       ignore_errors: true   # allow rescue block to handle failure
 
   rescue:
-  - name: Rollback and fail if stack deployment failed
-    block:
-      - docker_stack:
-          name: "{{ swarm_stack_name }}"
-          state: absent
-      - fail:
-          msg: |
-            Wazuh stack deployment failed on {{ inventory_hostname }}.
-            Docker Stack error output:
-            {{ deploy_result.stderr | default('No output captured') }}
+    - name: Rollback and fail if stack deployment failed
+      block:
+        - docker_stack:
+            name: "{{ swarm_stack_name }}"
+            state: absent
+        - fail:
+            msg: |
+              Wazuh stack deployment failed on {{ inventory_hostname }}.
+              Docker Stack error output:
+              {{ deploy_result.stderr | default('No output captured') }}
 
   always:
     # Cleanup temporary rendered file
