@@ -169,14 +169,19 @@ jobs:
           mkdir -p certs/indexer
           bash scripts/generate-certs.sh certs/indexer
 
+      - name: Copy certs to Swarm manager
+        run: |
+          scp -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no -r certs ubuntu@10.0.1.191:/home/ubuntu/
+
       - name: Create Docker secrets
         run: |
-          docker secret create indexer-key certs/indexer/indexer-key.pem
-          docker secret create indexer-cert certs/indexer/indexer.pem
-          docker secret create root-ca certs/indexer/root-ca.pem
-
-          docker secret create dashboard-key certs/dashboard/dashboard-key.pem
-          docker secret create dashboard-cert certs/dashboard/dashboard.pem
+          ssh -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no ubuntu@10.0.1.191 'bash -s' <<'EOF'
+          docker secret create indexer-key /home/ubuntu/certs/indexer/indexer-key.pem || true
+          docker secret create indexer-cert /home/ubuntu/certs/indexer/indexer.pem || true
+          docker secret create root-ca /home/ubuntu/certs/indexer/root-ca.pem || true
+          docker secret create dashboard-key /home/ubuntu/certs/dashboard/dashboard-key.pem || true
+          docker secret create dashboard-cert /home/ubuntu/certs/dashboard/dashboard.pem || true
+          EOF
 
       - name: Pre-flight ping to all nodes
         run: |
