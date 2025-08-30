@@ -51,30 +51,26 @@ WORKDIR $INSTALL_DIR
 # Copy entrypoint and securityadmin scripts
 COPY config/entrypoint.sh /entrypoint.sh
 COPY config/securityadmin.sh /securityadmin.sh
-RUN chmod 700 /entrypoint.sh /securityadmin.sh
+RUN chmod 700 /entrypoint.sh /securityadmin.sh && chown 1000:1000 /entrypoint.sh /securityadmin.sh
 
-# Set ownership of scripts
-RUN chown 1000:1000 /*.sh
-
-# Make sure config exists
-RUN mkdir -p /usr/share/wazuh-indexer/config && \
-    chown -R 1000:1000 /usr/share/wazuh-indexer/config
-
-# Copy Wazuh Indexer binaries and configuration from builder stage
+# Copy Wazuh Indexer binaries from builder
 COPY --from=builder --chown=1000:1000 /usr/share/wazuh-indexer /usr/share/wazuh-indexer
-COPY --from=builder --chown=1000:1000 /etc/wazuh-indexer /usr/share/wazuh-indexer/config
+
+# ---------------- Config & certs ----------------
+# Ensure config folder exists and has correct ownership
+RUN mkdir -p /usr/share/wazuh-indexer/config && \
+    chown -R 1000:1000 /usr/share/wazuh-indexer/config && \
+    chmod 755 /usr/share/wazuh-indexer/config
+
+# Ensure certs folder exists (for Docker secrets)
+RUN mkdir -p /usr/share/wazuh-indexer/config/certs && \
+    chown -R 1000:1000 /usr/share/wazuh-indexer/config/certs && \
+    chmod 700 /usr/share/wazuh-indexer/config/certs
 
 # Create runtime directories
 RUN mkdir -p /var/lib/wazuh-indexer /usr/share/wazuh-indexer/logs /run/wazuh-indexer /var/log/wazuh-indexer && \
     chown -R 1000:1000 /var/lib/wazuh-indexer /usr/share/wazuh-indexer/logs /run/wazuh-indexer /var/log/wazuh-indexer && \
-    chmod 700 /usr/share/wazuh-indexer /usr/share/wazuh-indexer/config && \
-    chmod 600 /usr/share/wazuh-indexer/config/jvm.options /usr/share/wazuh-indexer/config/opensearch.yml
-
-# ---------------- Docker secrets folder ----------------
-# Ensure the certs directory exists so Docker secrets can mount here
-RUN mkdir -p /usr/share/wazuh-indexer/config/certs && \
-    chown -R 1000:1000 /usr/share/wazuh-indexer/config/certs && \
-    chmod 700 /usr/share/wazuh-indexer/config/certs
+    chmod 700 /usr/share/wazuh-indexer /usr/share/wazuh-indexer/logs
 
 # Run as non-root user
 USER wazuh-indexer
