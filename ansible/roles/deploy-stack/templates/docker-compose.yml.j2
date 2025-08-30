@@ -53,7 +53,7 @@ services:
     networks:
       - wazuh-net
     environment:
-      OPENSEARCH_HTTP_SSL_ENABLED: "{{ 'false' }}"
+      OPENSEARCH_HTTP_SSL_ENABLED: "false"
     deploy:
       replicas: 1
       placement:
@@ -88,7 +88,7 @@ services:
       ELASTICSEARCH_PORT: 9200
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.wazuh-dashboard.rule=Host(`{{ 16.16.96.148 }}`)"
+      - "traefik.http.routers.wazuh-dashboard.rule=Host(`{{ public_ip }}`)"
       - "traefik.http.routers.wazuh-dashboard.entrypoints=websecure"
       - "traefik.http.routers.wazuh-dashboard.tls=true"
       - "traefik.http.routers.wazuh-dashboard.tls.certresolver=selfsigned"
