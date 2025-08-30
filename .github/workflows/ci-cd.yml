@@ -103,7 +103,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
 
-      # Pull official images (specify a version tag if needed)
+      # Delete old images first and Pull new ones
       - name: Pull Wazuh images
         run: |
           docker rmi ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0

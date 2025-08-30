@@ -15,14 +15,20 @@ export CACERT=${OPENSEARCH_PATH_CONF}/certs/root-ca.pem
 export CERT=${OPENSEARCH_PATH_CONF}/certs/indexer.pem
 export KEY=${OPENSEARCH_PATH_CONF}/certs/indexer-key.pem
 
-# --- Fix permissions for Docker secrets ---
+# --- Copy Docker secrets to a readable location ---
 if [[ "$(id -u)" == "0" ]]; then
     mkdir -p ${OPENSEARCH_PATH_CONF}/certs
+
+    # Copy secrets from /run/secrets
+    [[ -f /run/secrets/indexer-key ]] && cp /run/secrets/indexer-key ${OPENSEARCH_PATH_CONF}/certs/indexer-key.pem
+    [[ -f /run/secrets/indexer-cert ]] && cp /run/secrets/indexer-cert ${OPENSEARCH_PATH_CONF}/certs/indexer.pem
+    [[ -f /run/secrets/root-ca ]] && cp /run/secrets/root-ca ${OPENSEARCH_PATH_CONF}/certs/root-ca.pem
+
+    # Change ownership to non-root user
     chown -R 1000:0 ${OPENSEARCH_PATH_CONF}/certs
-    # Only chmod if PEM files exist
-    if compgen -G "${OPENSEARCH_PATH_CONF}/certs/*.pem" > /dev/null; then
-        chmod 600 ${OPENSEARCH_PATH_CONF}/certs/*.pem
-    fi
+
+    # Set secure permissions
+    chmod 600 ${OPENSEARCH_PATH_CONF}/certs/*.pem
 fi
 
 run_as_other_user_if_needed() {
