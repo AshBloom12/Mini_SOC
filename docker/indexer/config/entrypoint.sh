@@ -19,7 +19,10 @@ export KEY=${OPENSEARCH_PATH_CONF}/certs/indexer-key.pem
 if [[ "$(id -u)" == "0" ]]; then
     mkdir -p ${OPENSEARCH_PATH_CONF}/certs
     chown -R 1000:0 ${OPENSEARCH_PATH_CONF}/certs
-    chmod 600 ${OPENSEARCH_PATH_CONF}/certs/*.pem
+    # Only chmod if PEM files exist
+    if compgen -G "${OPENSEARCH_PATH_CONF}/certs/*.pem" > /dev/null; then
+        chmod 600 ${OPENSEARCH_PATH_CONF}/certs/*.pem
+    fi
 fi
 
 run_as_other_user_if_needed() {
