@@ -22,6 +22,7 @@ services:
       - wazuh-net
     environment:
       - OPENSEARCH_HTTP_SSL_ENABLED=false   # disable SSL to avoid certificate issues
+      - DISABLE_SECURITY_PLUGIN=true        # disable security plugin for simplicity
     volumes:
       - wazuh-indexer-data:/var/lib/wazuh-indexer
     deploy:
