@@ -36,7 +36,7 @@ RUN mkdir -p /var/lib/wazuh-indexer /usr/share/wazuh-indexer/logs /run/wazuh-ind
 # ---------------- Docker secrets folder ----------------
 # Ensure the directory exists so Docker secrets can mount here
 RUN mkdir -p /usr/share/wazuh-indexer/config/certs && \
-    chown 1000:1000 /usr/share/wazuh-indexer/config/certs && \
+    chown root:root /usr/share/wazuh-indexer/config/certs && \
     chmod 700 /usr/share/wazuh-indexer/config/certs
 
 # Run as non-root user
