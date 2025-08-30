@@ -143,7 +143,7 @@
 # Default value: ''
 # enrollment.dns: ''
 #
-#-------------------------------- API entries -----------------------------------
+# -------------------------------- API entries -----------------------------------
 # The following configuration is the default structure to define an API entry.
 #
 # hosts:

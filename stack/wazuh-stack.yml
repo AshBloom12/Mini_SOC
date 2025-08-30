@@ -30,12 +30,12 @@ services:
     networks:
       - wazuh-net
     secrets:
-    - source: indexer-key
-      target: /usr/share/wazuh-indexer/config/certs/indexer-key.pem
-    - source: indexer-cert
-      target: /usr/share/wazuh-indexer/config/certs/indexer.pem
-    - source: root-ca
-      target: /usr/share/wazuh-indexer/config/certs/root-ca.pem
+      - source: indexer-key
+        target: /usr/share/wazuh-indexer/config/certs/indexer-key.pem
+      - source: indexer-cert
+        target: /usr/share/wazuh-indexer/config/certs/indexer.pem
+      - source: root-ca
+        target: /usr/share/wazuh-indexer/config/certs/root-ca.pem
     deploy:
       replicas: 1
       placement:
