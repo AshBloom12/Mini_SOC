@@ -10,53 +10,51 @@ export OPENSEARCH_PATH_CONF=${INSTALLATION_DIR}/config
 export JAVA_HOME=${INSTALLATION_DIR}/jdk
 export DISCOVERY=$(grep -oP "(?<=discovery.type: ).*" ${OPENSEARCH_PATH_CONF}/opensearch.yml)
 
-# Certificates from Docker secrets
-export CACERT=${OPENSEARCH_PATH_CONF}/certs/root-ca.pem
-export CERT=${OPENSEARCH_PATH_CONF}/certs/indexer.pem
-export KEY=${OPENSEARCH_PATH_CONF}/certs/indexer-key.pem
+# --- Certificates (aligned with opensearch.yml) ---
+CERTS_DIR=/etc/wazuh-indexer/certs
+export CACERT=${CERTS_DIR}/root-ca.pem
+export CERT=${CERTS_DIR}/indexer.pem
+export KEY=${CERTS_DIR}/indexer-key.pem
 
-# --- Copy Docker secrets to a readable location ---
+# --- Copy Docker secrets to the certs directory ---
 if [[ "$(id -u)" == "0" ]]; then
-    mkdir -p ${OPENSEARCH_PATH_CONF}/certs
+    mkdir -p ${CERTS_DIR}
 
-    # Copy secrets from /run/secrets
-    [[ -f /run/secrets/indexer-key ]] && cp /run/secrets/indexer-key ${OPENSEARCH_PATH_CONF}/certs/indexer-key.pem
-    [[ -f /run/secrets/indexer-cert ]] && cp /run/secrets/indexer-cert ${OPENSEARCH_PATH_CONF}/certs/indexer.pem
-    [[ -f /run/secrets/root-ca ]] && cp /run/secrets/root-ca ${OPENSEARCH_PATH_CONF}/certs/root-ca.pem
+    [[ -f /run/secrets/indexer-key ]] && cp /run/secrets/indexer-key ${KEY}
+    [[ -f /run/secrets/indexer-cert ]] && cp /run/secrets/indexer-cert ${CERT}
+    [[ -f /run/secrets/root-ca ]] && cp /run/secrets/root-ca ${CACERT}
 
-    # Change ownership to non-root user
-    chown -R 1000:0 ${OPENSEARCH_PATH_CONF}/certs
-
-    # Set secure permissions
-    chmod 600 ${OPENSEARCH_PATH_CONF}/certs/*.pem
+    # Ensure correct ownership & permissions
+    chown -R 1000:0 ${CERTS_DIR}
+    chmod 600 ${CERTS_DIR}/*.pem
 fi
 
 run_as_other_user_if_needed() {
-  if [[ "$(id -u)" == "0" ]]; then
-    # Drop to UID 1000 / GID 0
-    exec chroot --userspec=1000:0 / "${@}"
-  else
-    exec "${@}"
-  fi
+    if [[ "$(id -u)" == "0" ]]; then
+        # Drop to UID 1000 / GID 0
+        exec chroot --userspec=1000:0 / "${@}"
+    else
+        exec "${@}"
+    fi
 }
 
 # Allow running custom commands
 if [[ "$1" != "opensearchwrapper" ]]; then
-  if [[ "$(id -u)" == "0" && $(basename "$1") == "opensearch" ]]; then
-    set -- "opensearch" "${@:2}"
-    exec chroot --userspec=1000:0 / "$@"
-  else
-    exec "$@"
-  fi
+    if [[ "$(id -u)" == "0" && $(basename "$1") == "opensearch" ]]; then
+        set -- "opensearch" "${@:2}"
+        exec chroot --userspec=1000:0 / "$@"
+    else
+        exec "$@"
+    fi
 fi
 
 # Source secrets-based environment for keystore
-source /usr/share/wazuh-indexer/bin/opensearch-env-from-file
+source ${INSTALLATION_DIR}/bin/opensearch-env-from-file
 
 # Bootstrap security password if INDEXER_PASSWORD is set
 if [[ -f bin/opensearch-users ]] && [[ -n "$INDEXER_PASSWORD" ]]; then
-    [[ -f /usr/share/wazuh-indexer/opensearch.keystore ]] || \
-      (run_as_other_user_if_needed opensearch-keystore create)
+    [[ -f ${INSTALLATION_DIR}/opensearch.keystore ]] || \
+        (run_as_other_user_if_needed opensearch-keystore create)
 
     if ! (run_as_other_user_if_needed opensearch-keystore has-passwd --silent); then
         if ! (run_as_other_user_if_needed opensearch-keystore list | grep -q '^bootstrap.password$'); then
@@ -82,4 +80,4 @@ fi
 # fi
 
 # Start Wazuh Indexer
-run_as_other_user_if_needed /usr/share/wazuh-indexer/bin/opensearch <<<"$KEYSTORE_PASSWORD"
+run_as_other_user_if_needed ${INSTALLATION_DIR}/bin/opensearch <<<"$KEYSTORE_PASSWORD"
