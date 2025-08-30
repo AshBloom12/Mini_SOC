@@ -47,46 +47,46 @@ jobs:
           password: ${{ secrets.GHCR_PAT }}
 
       # Build and Push Wazuh Indexer
-      - name: Build custom Wazuh Indexer
-        run: |
-          docker build \
-            --build-arg WAZUH_VERSION=4.12.0 \
-            --build-arg WAZUH_TAG_REVISION=1 \
-            -t ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0 \
-            -f docker/indexer/Dockerfile \
-            docker/indexer/
+      # - name: Build custom Wazuh Indexer
+      #  run: |
+      #    docker build \
+      #      --build-arg WAZUH_VERSION=4.12.0 \
+      #      --build-arg WAZUH_TAG_REVISION=1 \
+      #      -t ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0 \
+      #      -f docker/indexer/Dockerfile \
+      #      docker/indexer/
 
-      - name: Push Wazuh Indexer image
-        run: docker push ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
+      # - name: Push Wazuh Indexer image
+      #  run: docker push ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
 
       # Build and Push Wazuh Manager
-      - name: Build custom Wazuh Manager
-        run: |
-          docker build \
-            --build-arg WAZUH_VERSION=4.12.0 \
-            --build-arg WAZUH_TAG_REVISION=1 \
-            --build-arg FILEBEAT_TEMPLATE_BRANCH=main \
-            --build-arg WAZUH_FILEBEAT_MODULE=wazuh \
-            -t ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0 \
-            -f docker/manager/Dockerfile \
-            docker/manager/
+      # - name: Build custom Wazuh Manager
+      #  run: |
+      #    docker build \
+      #      --build-arg WAZUH_VERSION=4.12.0 \
+      #      --build-arg WAZUH_TAG_REVISION=1 \
+      #      --build-arg FILEBEAT_TEMPLATE_BRANCH=main \
+      #      --build-arg WAZUH_FILEBEAT_MODULE=wazuh \
+      #      -t ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0 \
+      #      -f docker/manager/Dockerfile \
+      #      docker/manager/
 
-      - name: Push Wazuh Manager image
-        run: docker push ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0
+      # - name: Push Wazuh Manager image
+      #   run: docker push ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0
 
       # Build and Push Wazuh Dashboard
-      - name: Build custom Wazuh Dashboard
-        run: |
-          docker build \
-            --build-arg WAZUH_VERSION=4.12.0 \
-            --build-arg WAZUH_TAG_REVISION=1 \
-            --build-arg WAZUH_UI_REVISION=4.12.0 \
-            -t ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0 \
-            -f docker/dashboard/Dockerfile \
-            docker/dashboard/
+      # - name: Build custom Wazuh Dashboard
+      #   run: |
+      #     docker build \
+      #       --build-arg WAZUH_VERSION=4.12.0 \
+      #       --build-arg WAZUH_TAG_REVISION=1 \
+      #       --build-arg WAZUH_UI_REVISION=4.12.0 \
+      #       -t ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0 \
+      #       -f docker/dashboard/Dockerfile \
+      #      docker/dashboard/
 
-      - name: Push Wazuh Dashboard image
-        run: docker push ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0
+      # - name: Push Wazuh Dashboard image
+      #   run: docker push ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0
 
   # ---------------- SECURITY SCAN ----------------
   scan:
@@ -103,30 +103,34 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
 
-      # Delete old images first and Pull new ones
+      # Remove old images
+      # - name: Remove old Wazuh images
+      #   run: |
+      #    docker rmi ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0 || true
+      #    docker rmi ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0 || true
+      #    docker rmi ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0 || true
+
+      # Pull new ones
       - name: Pull Wazuh images
         run: |
-          docker rmi ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0
-          docker rmi ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0
-          docker rmi ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
-          docker pull ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0
-          docker pull ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0
-          docker pull ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
+          docker pull wazuh/wazuh-manager:4.12.0
+          docker pull wazuh/wazuh-dashboard:4.12.0
+          docker pull wazuh/wazuh-indexer:4.12.0
 
       - name: Scan Wazuh Manager
         run: |
-          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-manager-report.json ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0
-          trivy image --ignorefile ./trivy/.trivyignore --format table ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-manager-report.json wazuh/wazuh-manager:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format table wazuh/wazuh-manager:4.12.0
 
       - name: Scan Wazuh Indexer
         run: |
-          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-indexer-report.json ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
-          trivy image --ignorefile ./trivy/.trivyignore --format table ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-indexer-report.json wazuh/wazuh-indexer:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format table wazuh/wazuh-indexer:4.12.0
 
       - name: Scan Wazuh Dashboard
         run: |
-          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-dashboard-report.json ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0
-          trivy image --ignorefile ./trivy/.trivyignore --format table ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format json -o trivy-dashboard-report.json wazuh/wazuh-dashboard:4.12.0
+          trivy image --ignorefile ./trivy/.trivyignore --format table wazuh/wazuh-dashboard:4.12.0
 
       # Always upload reports, even if scan fails
       - name: Upload Trivy reports as artifacts
@@ -155,9 +159,9 @@ jobs:
     runs-on: self-hosted
    
     env:
-      WAZUH_MANAGER_IMAGE: ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0
-      WAZUH_INDEXER_IMAGE: ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
-      WAZUH_DASHBOARD_IMAGE: ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0
+      WAZUH_MANAGER_IMAGE: wazuh/wazuh-manager:4.12.0
+      WAZUH_INDEXER_IMAGE: wazuh/wazuh-indexer:4.12.0
+      WAZUH_DASHBOARD_IMAGE: wazuh/wazuh-dashboard:4.12.0
       ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
       GHCR_TOKEN: ${{ secrets.GHCR_PAT }}
       GITHUB_ACTOR: ${{ github.actor }}
@@ -166,30 +170,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Generate self-signed certs
-        run: |
-          mkdir -p certs/indexer certs/dashboard
-          bash scripts/generate-certs.sh certs/indexer
-          bash scripts/generate-certs.sh certs/dashboard  # if needed for dashboard
-
-      - name: Copy certs to Swarm manager
-        run: |
-          scp -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no -r certs ubuntu@10.0.1.191:/home/ubuntu/
-
-      - name: Create Docker secrets on Swarm manager
-        run: |
-          ssh -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no ubuntu@10.0.1.191 'bash -s' <<'EOF'
-          # Ensure old secrets are removed first to avoid conflicts
-          docker secret rm indexer-key indexer-cert root-ca dashboard-key dashboard-cert || true
-
-          # Create secrets from uploaded certs
-          docker secret create indexer-key /home/ubuntu/certs/indexer/indexer-key.pem
-          docker secret create indexer-cert /home/ubuntu/certs/indexer/indexer.pem
-          docker secret create root-ca /home/ubuntu/certs/indexer/root-ca.pem
-          docker secret create dashboard-key /home/ubuntu/certs/dashboard/dashboard-key.pem
-          docker secret create dashboard-cert /home/ubuntu/certs/dashboard/dashboard.pem
-          EOF
 
       - name: Pre-flight ping to all nodes
         run: |

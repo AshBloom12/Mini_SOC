@@ -90,7 +90,10 @@ ansible/
 ├─ secrets/
 ├─ deploy-stack/
 └─ traefik/
-docker/Dockerfile                     # Custom vulnerable image for Trivy demo
+docker/                               # Custom Wazuh images
+├─ dashboard/
+├─ indexer/
+└─ manager/                    
 stack/wazuh-stack.yml                 # Wazuh stack for Swarm
 security/tls/traefik/traefik.yml      # Traefik static config
 security/tls/traefik/dynamic.yml      # Traefik dynamic TLS config
@@ -98,7 +101,7 @@ security/tls/policy.md                # Security policy
 tests/
 ├─ selenium/test\_dashboard.py        # Selenium dashboard tests
 ├─ selenium/requirements.txt
-└─ api/test\_health.py                 # Wazuh API probe
+└─ api/test\_health.py                # Wazuh API probe
 trivy/trivy.yaml                      # Trivy config
 trivy/.trivyignore
 .ansible-lint.yml
