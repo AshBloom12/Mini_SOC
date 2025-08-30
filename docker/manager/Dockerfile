@@ -34,22 +34,22 @@ RUN rm /filebeat_module.sh
 RUN curl -fL -o /tmp/s6-overlay-amd64.tar.xz \
     https://github.com/just-containers/s6-overlay/releases/download/${S6_VERSION}/s6-overlay-x86_64.tar.xz
 
-RUN tar xJf /tmp/s6-overlay-amd64.tar.xz -C / --exclude="./bin" && \
-    tar xJf /tmp/s6-overlay-amd64.tar.xz -C /usr ./bin && \
+# 4. Extract s6-overlay
+RUN tar -xJf /tmp/s6-overlay-amd64.tar.xz -C / && \
     rm /tmp/s6-overlay-amd64.tar.xz
 
-# 6. Copy configuration
+# 5. Copy configuration
 COPY config/etc/ /etc/
 COPY --chown=root:wazuh config/create_user.py /var/ossec/framework/scripts/create_user.py
 COPY config/filebeat.yml /etc/filebeat/
 RUN chmod go-w /etc/filebeat/filebeat.yml
 
-# 7. Add Filebeat template
+# 6. Add Filebeat template
 ARG FILEBEAT_TEMPLATE_BRANCH=main
 ADD https://raw.githubusercontent.com/wazuh/wazuh/$FILEBEAT_TEMPLATE_BRANCH/extensions/elasticsearch/7.x/wazuh-template.json /etc/filebeat/
 RUN chmod go-w /etc/filebeat/wazuh-template.json
 
-# 8. Prepare permanent data directories
+# 7. Prepare permanent data directories
 RUN mkdir -p /var/ossec/var/multigroups && \
     chown root:wazuh /var/ossec/var/multigroups && chmod 770 /var/ossec/var/multigroups && \
     mkdir -p /var/ossec/agentless && \
