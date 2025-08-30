@@ -23,9 +23,15 @@ chmod 700 "${CERTS_DIR}"
 
 # --- Copy Docker secrets if running as root ---
 if [[ "$(id -u)" == "0" ]]; then
-    [[ -f /run/secrets/indexer-key ]] && cp /run/secrets/indexer-key "${KEY}"
-    [[ -f /run/secrets/indexer-cert ]] && cp /run/secrets/indexer-cert "${CERT}"
-    [[ -f /run/secrets/root-ca ]] && cp /run/secrets/root-ca "${CACERT}"
+    for secret in indexer-key indexer-cert root-ca; do
+        if [[ -f /run/secrets/$secret ]]; then
+            case $secret in
+                indexer-key) cp /run/secrets/$secret "${KEY}" ;;
+                indexer-cert) cp /run/secrets/$secret "${CERT}" ;;
+                root-ca) cp /run/secrets/$secret "${CACERT}" ;;
+            esac
+        fi
+    done
 
     # Set ownership and permissions
     chown -R 1000:0 "${CERTS_DIR}"
@@ -52,7 +58,7 @@ fi
 # Bootstrap security password if INDEXER_PASSWORD is set
 if [[ -f bin/opensearch-users ]] && [[ -n "$INDEXER_PASSWORD" ]]; then
     [[ -f ${INSTALLATION_DIR}/opensearch.keystore ]] || (run_as_wazuh_user opensearch-keystore create)
-    
+
     if ! (run_as_wazuh_user opensearch-keystore has-passwd --silent); then
         if ! (run_as_wazuh_user opensearch-keystore list | grep -q '^bootstrap.password$'); then
             (run_as_wazuh_user echo "$INDEXER_PASSWORD" | opensearch-keystore add -x 'bootstrap.password')

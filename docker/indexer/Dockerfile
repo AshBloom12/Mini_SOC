@@ -54,14 +54,13 @@ COPY config/securityadmin.sh /securityadmin.sh
 RUN chmod 700 /entrypoint.sh /securityadmin.sh && chown 1000:0 /*.sh
 
 # --- Ensure config and certs directories exist with proper permissions ---
-RUN mkdir -p /usr/share/wazuh-indexer/config \
-    /usr/share/wazuh-indexer/config/certs && \
+RUN mkdir -p /usr/share/wazuh-indexer/config/certs && \
     chown -R 1000:0 /usr/share/wazuh-indexer/config && \
     chmod 700 /usr/share/wazuh-indexer/config/certs
 
 # Copy Wazuh Indexer binaries and configuration from builder stage
 COPY --from=builder --chown=1000:0 /usr/share/wazuh-indexer /usr/share/wazuh-indexer
-COPY --from=builder --chown=1000:0 /etc/wazuh-indexer /usr/share/wazuh-indexer/config
+# COPY --from=builder --chown=1000:0 /etc/wazuh-indexer /usr/share/wazuh-indexer/config
 
 # Create runtime directories for logs, data, and temporary files
 RUN mkdir -p /var/lib/wazuh-indexer /usr/share/wazuh-indexer/logs /run/wazuh-indexer /var/log/wazuh-indexer && \
