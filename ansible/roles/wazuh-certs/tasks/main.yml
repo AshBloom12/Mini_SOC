@@ -15,12 +15,6 @@
     state: absent
     force_kill: yes
 
-- name: Ensure temporary cert-populate-indexer container is removed
-  docker_container:
-    name: wazuh-certs-populate-indexer
-    state: absent
-    force_kill: yes
-
 - name: Populate Wazuh dashboard certs into Docker volume
   docker_container:
     name: wazuh-certs-populate-dashboard
@@ -34,6 +28,12 @@
     auto_remove: yes
   delegate_to: "{{ item }}"
   loop: "{{ groups['all'] }}"   # Runs on all nodes
+
+- name: Ensure temporary cert-populate-indexer container is removed
+  docker_container:
+    name: wazuh-certs-populate-indexer
+    state: absent
+    force_kill: yes
 
 - name: Populate Wazuh indexer certs into Docker volume
   docker_container:
