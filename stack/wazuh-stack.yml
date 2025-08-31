@@ -74,7 +74,7 @@ services:
       - wazuh-manager
     volumes:
       - wazuh-dashboard-data:/usr/share/wazuh-dashboard/data
-      - wazuh-certs:/etc/wazuh/certs:ro
+      - wazuh-certs:/etc/wazuh-dashboard/certs:ro
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wazuh-dashboard.rule=Host(`16.16.96.148`)"

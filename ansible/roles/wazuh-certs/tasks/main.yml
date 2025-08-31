@@ -10,7 +10,7 @@
     image: alpine:latest
     state: started
     command: >
-      sh -c "cp -r /source/* /certs/"
+      sh -c "cp -r /source/* /certs/ && chmod -R 644 /certs/* && chown -R 1000:1000 /certs/"
     volumes:
       - "{{ wazuh_certs_volume }}:/certs"
       - "{{ wazuh_certs_source }}:/source:ro"
