@@ -26,7 +26,7 @@ services:
       - wazuh-net
     volumes:
       - wazuh-indexer-data:/var/lib/wazuh-indexer
-      - wazuh-certs:/etc/wazuh-indexer/certs:ro
+      - wazuh-certs-indexer:/etc/wazuh-indexer/certs:ro
     deploy:
       replicas: 1
       placement:
@@ -49,8 +49,8 @@ services:
     networks:
       - wazuh-net
     volumes:
-      - wazuh-indexer-data:/var/lib/wazuh-indexer
-      - wazuh-certs-indexer:/etc/wazuh-indexer/certs:ro
+      - wazuh-manager-data:/var/ossec/data
+      - wazuh-certs:/etc/wazuh/certs:ro
     depends_on:
       - wazuh-indexer
     deploy:
