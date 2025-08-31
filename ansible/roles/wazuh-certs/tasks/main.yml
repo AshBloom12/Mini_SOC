@@ -1,17 +1,29 @@
-- name: Ensure temporary container is removed if it exists
+- name: Ensure temporary cert-populate container is removed
   docker_container:
     name: wazuh-certs-populate
     state: absent
     force_kill: yes
 
-- name: Populate Wazuh certs into Docker volume
+- name: Populate Wazuh dashboard certs into Docker volume
   docker_container:
-    name: wazuh-certs-populate
+    name: wazuh-certs-populate-dashboard
     image: alpine:latest
     state: started
     command: >
       sh -c "cp -r /source/* /certs/ && chmod -R 644 /certs/* && chown -R 1000:1000 /certs/"
     volumes:
-      - "{{ wazuh_certs_volume }}:/certs"
-      - "{{ wazuh_certs_source }}:/source:ro"
+      - "wazuh-certs-dashboard:/certs"
+      - "~/certs/dashboard:/source:ro"
+    auto_remove: yes
+
+- name: Populate Wazuh indexer certs into Docker volume
+  docker_container:
+    name: wazuh-certs-populate-indexer
+    image: alpine:latest
+    state: started
+    command: >
+      sh -c "cp -r /source/* /certs/ && chmod -R 644 /certs/* && chown -R 1000:1000 /certs/"
+    volumes:
+      - "wazuh-certs-indexer:/certs"
+      - "~/certs/indexer:/source:ro"
     auto_remove: yes
