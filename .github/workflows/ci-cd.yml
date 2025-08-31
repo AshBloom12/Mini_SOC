@@ -7,11 +7,6 @@ on:
   # Triggers the workflow on push event but only for the "main" branch
   push:
     branches: ["main"]
-  #  paths:
-  #    - 'ansible/**'
-  #    - 'docker/**'
-  #    - '.github/workflows/ci-cd.yml'
-  #    - 'rules/**'   # also trigger when rules change
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -273,7 +268,7 @@ jobs:
   # ---------------- DEPLOY CUSTOM RULES ----------------
   deploy_rules:
     runs-on: self-hosted
-    needs: deploy   # run after infra is deployed
+    needs: test
     if: contains(github.event.head_commit.message, '[rules]') || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout repository
