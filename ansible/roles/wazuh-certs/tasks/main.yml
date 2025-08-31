@@ -24,27 +24,27 @@
   ignore_errors: true
 
 # ---------------- Sync certs from Node1 to all other nodes ----------------
-- name: Sync Wazuh indexer certs to all other nodes
+- name: Sync Wazuh indexer certs from node1 to other nodes
   synchronize:
     src: /home/ubuntu/certs/indexer/
     dest: /home/ubuntu/certs/indexer/
     mode: push
     recursive: true
     rsync_opts:
-      - "--rsh='ssh -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no'"
+      - "--rsh=ssh -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no"
   delegate_to: node1
-  run_once: true
+  when: inventory_hostname != 'node1'
 
-- name: Sync Wazuh dashboard certs to all other nodes
+- name: Sync Wazuh dashboard certs from node1 to other nodes
   synchronize:
     src: /home/ubuntu/certs/dashboard/
     dest: /home/ubuntu/certs/dashboard/
     mode: push
     recursive: true
     rsync_opts:
-      - "--rsh='ssh -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no'"
+      - "--rsh=ssh -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no"
   delegate_to: node1
-  run_once: true
+  when: inventory_hostname != 'node1'
 
 
 # Populate Wazuh dashboard certs into Docker volume on each node
@@ -77,22 +77,26 @@
 
 
 # ---------------- Fix ownership and permissions ----------------
-- name: Fix ownership and permissions for dashboard certs
+- name: Ensure correct permissions for dashboard certs
   file:
     path: /home/ubuntu/certs/dashboard
-    recurse: true
+    state: directory
     owner: 1000
     group: 1000
-    mode: '0644'
-  delegate_to: "{{ item }}"
-  loop: "{{ groups['all'] }}"
+    mode: '0755'
+    recurse: true
 
-- name: Fix ownership and permissions for indexer certs
+- name: Fix file permissions inside dashboard certs dir
+  command: find /home/ubuntu/certs/dashboard -type f -exec chmod 0644 {} \;
+
+- name: Ensure correct permissions for indexer certs
   file:
     path: /home/ubuntu/certs/indexer
-    recurse: true
+    state: directory
     owner: 1000
     group: 1000
-    mode: '0644'
-  delegate_to: "{{ item }}"
-  loop: "{{ groups['all'] }}"
+    mode: '0755'
+    recurse: true
+
+- name: Fix file permissions inside indexer certs dir
+  command: find /home/ubuntu/certs/indexer -type f -exec chmod 0644 {} \;
