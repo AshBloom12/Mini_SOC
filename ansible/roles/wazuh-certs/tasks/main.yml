@@ -31,6 +31,9 @@
     recursive: yes
   delegate_to: node1
   run_once: true
+  with_items: "{{ groups['all'] }}"
+  loop_control:
+    loop_var: target_node
 
 - name: Sync Wazuh dashboard certs to all nodes
   synchronize:
