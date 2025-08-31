@@ -65,7 +65,7 @@ services:
       - ELASTICSEARCH_PORT=9200
       - WAZUH_MANAGER_HOST=wazuh-manager
       - WAZUH_MANAGER_PORT=55000
-      - WAZUH_CERTS_PATH=/etc/wazuh/certs
+      - WAZUH_CERTS_PATH=/etc/wazuh-dashboard/certs
     networks:
       - wazuh-net
       - traefik-public
