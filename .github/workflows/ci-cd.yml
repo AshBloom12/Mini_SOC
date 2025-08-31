@@ -11,7 +11,7 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# This workflow contains 5 jobs called "lint", "build", "scan", "test" and "deploy" that run sequentially
+# This workflow contains 5 jobs called "lint", "build", "scan", "deploy", "test" and "deploy_rule" that run sequentially
 jobs:
   # ---------------- LINT STAGE -----------------
   lint:

@@ -1,3 +1,14 @@
+- name: Ensure cert directories exist on all nodes
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: 1000
+    group: 1000
+    mode: '0755'
+  loop:
+    - /home/ubuntu/certs/indexer
+    - /home/ubuntu/certs/dashboard
+
 - name: Ensure temporary cert-populate container is removed
   docker_container:
     name: wazuh-certs-populate
@@ -15,6 +26,8 @@
       - "wazuh-certs-dashboard:/certs"
       - "/home/ubuntu/certs/dashboard:/source:ro"
     auto_remove: yes
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['all'] }}"   # Runs on all nodes
 
 - name: Populate Wazuh indexer certs into Docker volume
   docker_container:
@@ -27,3 +40,25 @@
       - "wazuh-certs-indexer:/certs"
       - "/home/ubuntu/certs/indexer:/source:ro"
     auto_remove: yes
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['all'] }}"   # Runs on all nodes
+
+- name: Fix ownership and permissions for dashboard certs
+  file:
+    path: /home/ubuntu/certs/dashboard
+    recurse: yes
+    owner: 1000
+    group: 1000
+    mode: '0644'
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['all'] }}"
+
+- name: Fix ownership and permissions for indexer certs
+  file:
+    path: /home/ubuntu/certs/indexer
+    recurse: yes
+    owner: 1000
+    group: 1000
+    mode: '0644'
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['all'] }}"
