@@ -14,4 +14,4 @@
     volumes:
       - "{{ wazuh_certs_volume }}:/certs"
       - "{{ wazuh_certs_source }}:/source:ro"
-    remove: yes
+    auto_remove: yes
