@@ -79,8 +79,8 @@ flowchart LR
 .github/workflows/ci-cd.yml           # CI/CD pipeline
 ansible/
 ├─ inventories/production/
-│   ├─ group\_vars/all/all.yml
-│   ├─ group\_vars/all/vault.yml
+│   ├─ group_vars/all/all.yml
+│   ├─ group_vars/all/vault.yml
 │   └─ hosts.yml
 ├─ playbooks/
 │   ├─ deploy_rules.yml               # Playbook to deploy custom rules
@@ -110,9 +110,9 @@ security/tls
 ├─ wazuh/config.yml                   # Configuration file for cert generator script
 └─ policy.md                          # Security policy
 tests/
-├─ selenium/test\_dashboard.py        # Selenium dashboard tests
+├─ selenium/test_dashboard.py        # Selenium dashboard tests
 ├─ selenium/requirements.txt
-└─ api/test\_health.py                # Wazuh API probe
+└─ api/test_health.py                # Wazuh API probe
 trivy/trivy.yaml                      # Trivy config
 trivy/.trivyignore
 .ansible-lint.yml

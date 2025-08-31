@@ -24,12 +24,12 @@ services:
       - wazuh-net
     volumes:
       - wazuh-indexer-data:/var/lib/wazuh-indexer
-      - wazuh-certs:/etc/wazuh/certs:ro  # Mount certs as read-only
+      - wazuh-certs:/etc/wazuh-indexer/certs:ro
     deploy:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == node3  # Changed to worker VM
+          - node.hostname == node2
     healthcheck:
       test: ["CMD", "curl", "-f", "https://localhost:9200/_cluster/health --cacert /etc/wazuh/certs/ca.pem || exit 1"]
       interval: 10s
@@ -55,7 +55,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == node3
+          - node.hostname == node2
 
   # ---------------- Wazuh Dashboard ----------------
   wazuh-dashboard:
@@ -86,4 +86,4 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == node2  # Dashboard VM (manager node)
+          - node.hostname == node1

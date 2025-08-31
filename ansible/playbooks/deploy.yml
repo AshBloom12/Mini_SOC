@@ -109,7 +109,7 @@
 
 # ---------------- Wazuh TLS Certificates ----------------
 - name: Populate Wazuh TLS certificates into Docker volume
-  hosts: node2:node3
+  hosts: node1:node2
   become: true
   vars:
     wazuh_certs_source: "{{ playbook_dir }}/security/tls/wazuh/wazuh-certificates"
@@ -119,7 +119,7 @@
 
 # ---------------- Deploy Wazuh stack ----------------
 - name: Deploy/Update Wazuh Docker stack
-  hosts: node3
+  hosts: node1
   become: true
   vars:
     stack_file: "{{ playbook_dir }}/stack/wazuh-stack.yml"
