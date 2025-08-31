@@ -1,6 +1,6 @@
 - name: Deploy all custom Wazuh rules
   hosts: node2
-  become: yes
+  become: true
   vars:
     wazuh_rules_src: "{{ playbook_dir }}/../../rules/"
     wazuh_rules_dest: "/var/ossec/etc/rules/"
