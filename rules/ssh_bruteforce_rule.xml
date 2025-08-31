@@ -1,0 +1,16 @@
+<group name="sshd,authentication_failures">
+  <!-- Detect SSH brute force attacks -->
+  <rule id="100001" level="10">
+    <if_sid>5716</if_sid> <!-- Wazuh default: failed SSH login -->
+    <frequency>5</frequency> <!-- Number of events -->
+    < timeframe>300</timeframe> <!-- Time window in seconds (5 minutes) -->
+    <description>SSH brute force attack detected: multiple failed login attempts</description>
+    <mitre>
+      <id>T1110</id>
+      <technique>Brute Force</technique>
+    </mitre>
+    <group>authentication_failures, brute_force</group>
+    <alert_by_email>yes</alert_by_email>
+    <email_subject>SSH Brute Force Alert</email_subject>
+  </rule>
+</group>

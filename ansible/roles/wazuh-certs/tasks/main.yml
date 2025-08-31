@@ -14,12 +14,14 @@
     name: wazuh-certs-populate-dashboard
     state: absent
     force_kill: yes
+  ignore_errors: yes
 
 - name: Remove existing Wazuh indexer cert-populate container
   docker_container:
     name: wazuh-certs-populate-indexer
     state: absent
     force_kill: yes
+  ignore_errors: yes
 
 - name: Sync Wazuh indexer certs to all nodes
   synchronize:
@@ -50,6 +52,8 @@
       - "wazuh-certs-dashboard:/certs"
       - "/home/ubuntu/certs/dashboard:/source:ro"
     auto_remove: yes
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['all'] }}"
 
 - name: Populate Wazuh indexer certs into Docker volume
   docker_container:
@@ -62,6 +66,8 @@
       - "wazuh-certs-indexer:/certs"
       - "/home/ubuntu/certs/indexer:/source:ro"
     auto_remove: yes
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['all'] }}"
 
 - name: Fix ownership and permissions for dashboard certs
   file:
