@@ -52,8 +52,6 @@
       - "wazuh-certs-dashboard:/certs"
       - "/home/ubuntu/certs/dashboard:/source:ro"
     auto_remove: yes
-  delegate_to: "{{ item }}"
-  loop: "{{ groups['all'] }}"
 
 - name: Populate Wazuh indexer certs into Docker volume
   docker_container:
@@ -66,8 +64,6 @@
       - "wazuh-certs-indexer:/certs"
       - "/home/ubuntu/certs/indexer:/source:ro"
     auto_remove: yes
-  delegate_to: "{{ item }}"
-  loop: "{{ groups['all'] }}"
 
 - name: Fix ownership and permissions for dashboard certs
   file:
@@ -76,8 +72,6 @@
     owner: 1000
     group: 1000
     mode: '0644'
-  delegate_to: "{{ item }}"
-  loop: "{{ groups['all'] }}"
 
 - name: Fix ownership and permissions for indexer certs
   file:
@@ -86,5 +80,3 @@
     owner: 1000
     group: 1000
     mode: '0644'
-  delegate_to: "{{ item }}"
-  loop: "{{ groups['all'] }}"
