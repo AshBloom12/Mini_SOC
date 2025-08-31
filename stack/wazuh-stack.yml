@@ -26,7 +26,7 @@ services:
       - wazuh-net
     volumes:
       - wazuh-indexer-data:/var/lib/wazuh-indexer
-      - wazuh-certs-indexer:/etc/wazuh-indexer/certs:ro
+      - wazuh-certs-indexer:/etc/wazuh-indexer/certs:rw
     deploy:
       replicas: 1
       placement:
@@ -77,7 +77,7 @@ services:
     wazuh-dashboard:
     volumes:
       - wazuh-dashboard-data:/usr/share/wazuh-dashboard/data
-      - wazuh-certs-dashboard:/etc/wazuh-dashboard/certs:ro
+      - wazuh-certs-dashboard:/etc/wazuh-dashboard/certs:rw
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wazuh-dashboard.rule=Host(`16.16.96.148`)"
