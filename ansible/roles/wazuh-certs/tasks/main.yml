@@ -47,7 +47,7 @@
   run_once: true
 
 
-# ---------------- Populate certs into Docker volumes ----------------
+# Populate Wazuh dashboard certs into Docker volume on each node
 - name: Populate Wazuh dashboard certs into Docker volume
   docker_container:
     name: wazuh-certs-populate-dashboard
@@ -60,9 +60,8 @@
       - "/home/ubuntu/certs/dashboard:/source:ro"
     auto_remove: true
   run_once: false
-  delegate_to: "{{ item }}"
-  loop: "{{ groups['all'] }}"
 
+# Populate Wazuh indexer certs into Docker volume on each node
 - name: Populate Wazuh indexer certs into Docker volume
   docker_container:
     name: wazuh-certs-populate-indexer
@@ -75,8 +74,6 @@
       - "/home/ubuntu/certs/indexer:/source:ro"
     auto_remove: true
   run_once: false
-  delegate_to: "{{ item }}"
-  loop: "{{ groups['all'] }}"
 
 
 # ---------------- Fix ownership and permissions ----------------
