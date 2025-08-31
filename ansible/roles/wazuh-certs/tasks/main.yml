@@ -23,27 +23,28 @@
     force_kill: yes
   ignore_errors: yes
 
-- name: Sync Wazuh indexer certs to all nodes
+# ---------------- Sync certs from Node1 to all other nodes ----------------
+- name: Sync Wazuh indexer certs to all other nodes
   synchronize:
     src: /home/ubuntu/certs/indexer/
     dest: /home/ubuntu/certs/indexer/
     mode: push
     recursive: yes
-  delegate_to: node1
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['all'] | difference(['node1']) }}"
   run_once: true
-  with_items: "{{ groups['all'] }}"
-  loop_control:
-    loop_var: target_node
 
-- name: Sync Wazuh dashboard certs to all nodes
+- name: Sync Wazuh dashboard certs to all other nodes
   synchronize:
     src: /home/ubuntu/certs/dashboard/
     dest: /home/ubuntu/certs/dashboard/
     mode: push
     recursive: yes
-  delegate_to: node1
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['all'] | difference(['node1']) }}"
   run_once: true
 
+# ---------------- Populate certs into Docker volumes ----------------
 - name: Populate Wazuh dashboard certs into Docker volume
   docker_container:
     name: wazuh-certs-populate-dashboard
@@ -55,6 +56,8 @@
       - "wazuh-certs-dashboard:/certs"
       - "/home/ubuntu/certs/dashboard:/source:ro"
     auto_remove: yes
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['all'] }}"
 
 - name: Populate Wazuh indexer certs into Docker volume
   docker_container:
@@ -67,7 +70,10 @@
       - "wazuh-certs-indexer:/certs"
       - "/home/ubuntu/certs/indexer:/source:ro"
     auto_remove: yes
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['all'] }}"
 
+# ---------------- Fix ownership and permissions ----------------
 - name: Fix ownership and permissions for dashboard certs
   file:
     path: /home/ubuntu/certs/dashboard
@@ -75,6 +81,8 @@
     owner: 1000
     group: 1000
     mode: '0644'
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['all'] }}"
 
 - name: Fix ownership and permissions for indexer certs
   file:
@@ -83,3 +91,5 @@
     owner: 1000
     group: 1000
     mode: '0644'
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['all'] }}"
