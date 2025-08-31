@@ -10,16 +10,16 @@
     - /home/ubuntu/certs/dashboard
 
 - name: Remove existing Wazuh dashboard cert-populate container
-  ansible.builtin.shell: docker rm -f wazuh-certs-populate-dashboard || true
-  delegate_to: "{{ item }}"
-  loop: "{{ groups['all'] }}"
-  ignore_errors: yes
+  docker_container:
+    name: wazuh-certs-populate-dashboard
+    state: absent
+    force_kill: yes
 
 - name: Remove existing Wazuh indexer cert-populate container
-  ansible.builtin.shell: docker rm -f wazuh-certs-populate-indexer || true
-  delegate_to: "{{ item }}"
-  loop: "{{ groups['all'] }}"
-  ignore_errors: yes
+  docker_container:
+    name: wazuh-certs-populate-indexer
+    state: absent
+    force_kill: yes
 
 - name: Populate Wazuh dashboard certs into Docker volume
   docker_container:
@@ -32,8 +32,6 @@
       - "wazuh-certs-dashboard:/certs"
       - "/home/ubuntu/certs/dashboard:/source:ro"
     auto_remove: yes
-  delegate_to: "{{ item }}"
-  loop: "{{ groups['all'] }}"
 
 - name: Populate Wazuh indexer certs into Docker volume
   docker_container:
@@ -46,8 +44,6 @@
       - "wazuh-certs-indexer:/certs"
       - "/home/ubuntu/certs/indexer:/source:ro"
     auto_remove: yes
-  delegate_to: "{{ item }}"
-  loop: "{{ groups['all'] }}"
 
 - name: Fix ownership and permissions for dashboard certs
   file:
