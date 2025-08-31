@@ -30,12 +30,10 @@
     dest: /home/ubuntu/certs/indexer/
     mode: push
     recursive: yes
-    rsync_path: "sudo -u ubuntu rsync"
     rsync_opts:
       - "--rsh='ssh -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no'"
   delegate_to: node1
   run_once: true
-  become: no
 
 - name: Sync Wazuh dashboard certs to all other nodes
   synchronize:
