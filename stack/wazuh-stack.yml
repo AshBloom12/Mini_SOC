@@ -13,7 +13,9 @@ volumes:
     driver: local
   wazuh-dashboard-data:
     driver: local
-  wazuh-certs:  # New volume for Wazuh TLS certs
+  wazuh-certs-dashboard:
+    driver: local
+  wazuh-certs-indexer:
     driver: local
 
 services:
@@ -47,8 +49,8 @@ services:
     networks:
       - wazuh-net
     volumes:
-      - wazuh-manager-data:/var/ossec/data
-      - wazuh-certs:/etc/wazuh/certs:ro
+      - wazuh-indexer-data:/var/lib/wazuh-indexer
+      - wazuh-certs-indexer:/etc/wazuh-indexer/certs:ro
     depends_on:
       - wazuh-indexer
     deploy:
@@ -72,9 +74,10 @@ services:
     depends_on:
       - wazuh-indexer
       - wazuh-manager
+    wazuh-dashboard:
     volumes:
       - wazuh-dashboard-data:/usr/share/wazuh-dashboard/data
-      - wazuh-certs:/etc/wazuh-dashboard/certs:ro
+      - wazuh-certs-dashboard:/etc/wazuh-dashboard/certs:ro
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wazuh-dashboard.rule=Host(`16.16.96.148`)"

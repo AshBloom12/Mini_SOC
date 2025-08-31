@@ -13,7 +13,7 @@
       sh -c "cp -r /source/* /certs/ && chmod -R 644 /certs/* && chown -R 1000:1000 /certs/"
     volumes:
       - "wazuh-certs-dashboard:/certs"
-      - "~/certs/dashboard:/source:ro"
+      - "/home/ubuntu/certs/dashboard:/source:ro"
     auto_remove: yes
 
 - name: Populate Wazuh indexer certs into Docker volume
@@ -25,5 +25,5 @@
       sh -c "cp -r /source/* /certs/ && chmod -R 644 /certs/* && chown -R 1000:1000 /certs/"
     volumes:
       - "wazuh-certs-indexer:/certs"
-      - "~/certs/indexer:/source:ro"
+      - "/home/ubuntu/certs/indexer:/source:ro"
     auto_remove: yes
