@@ -59,6 +59,7 @@
       - "wazuh-certs-dashboard:/certs"
       - "/home/ubuntu/certs/dashboard:/source:ro"
     auto_remove: true
+  run_once: false
   delegate_to: "{{ item }}"
   loop: "{{ groups['all'] }}"
 
@@ -73,8 +74,10 @@
       - "wazuh-certs-indexer:/certs"
       - "/home/ubuntu/certs/indexer:/source:ro"
     auto_remove: true
+  run_once: false
   delegate_to: "{{ item }}"
   loop: "{{ groups['all'] }}"
+
 
 # ---------------- Fix ownership and permissions ----------------
 - name: Fix ownership and permissions for dashboard certs
