@@ -1,25 +1,17 @@
-- name: Populate Wazuh certs Docker volume
-  hosts: node2:node3  # Target both manager and worker nodes
-  become: yes
-  vars:
-    wazuh_certs_source: "{{ playbook_dir }}/security/tls/wazuh/wazuh-certificates"
-    wazuh_certs_volume: wazuh-certs
+- name: Ensure temporary container is removed if it exists
+  docker_container:
+    name: wazuh-certs-populate
+    state: absent
+    force_kill: yes
 
-  tasks:
-    - name: Ensure temporary container is removed if it exists
-      docker_container:
-        name: wazuh-certs-populate
-        state: absent
-        force_kill: yes
-
-    - name: Populate Wazuh certs into Docker volume
-      docker_container:
-        name: wazuh-certs-populate
-        image: alpine:latest
-        state: started
-        command: >
-          sh -c "cp -r /source/* /certs/"
-        volumes:
-          - "{{ wazuh_certs_volume }}:/certs"
-          - "{{ wazuh_certs_source }}:/source:ro"
-        remove: yes
+- name: Populate Wazuh certs into Docker volume
+  docker_container:
+    name: wazuh-certs-populate
+    image: alpine:latest
+    state: started
+    command: >
+      sh -c "cp -r /source/* /certs/"
+    volumes:
+      - "{{ wazuh_certs_volume }}:/certs"
+      - "{{ wazuh_certs_source }}:/source:ro"
+    remove: yes

@@ -1,7 +1,5 @@
-# deploy.yml
-
-# Ensure Docker is installed on all nodes
-- name: Ensure Docker is installed on all nodes
+# ---------------- Docker installation and setup ----------------
+- name: Ensure Docker and prerequisites are installed on all nodes
   hosts: all
   become: true
   gather_facts: true
@@ -71,12 +69,10 @@
         name: python3-docker
         state: present
 
-    # Ensure python jsondiff is installed to compare stack definitions and detect changes
     - name: Ensure python3-jsondiff is installed
-      apt:
+      ansible.builtin.apt:
         name: python3-jsondiff
         state: present
-      become: true
 
     - name: Ensure Docker service is running
       ansible.builtin.service:
@@ -90,8 +86,8 @@
         groups: docker
         append: true
 
-# Log in to GitHub Container Registry
-- name: Log in to GitHub Container Registry on Swarm nodes
+# ---------------- GitHub Container Registry login ----------------
+- name: Log in to GitHub Container Registry on all nodes
   hosts: all
   become: true
   tasks:
@@ -101,10 +97,32 @@
         username: "{{ lookup('env', 'GITHUB_ACTOR') }}"
         password: "{{ lookup('env', 'GHCR_TOKEN') }}"
 
+# ---------------- Swarm, networks, Traefik, secrets ----------------
+- name: Initialize Swarm, overlay networks, Traefik, and secrets
+  hosts: all
+  become: true
   roles:
-    - swarm-init    # initializes Swarm and sets join tokens
-    - networks      # creates overlay networks
-    - traefik       # deploys Traefik reverse proxy with TLS/ACME
-    - secrets       # creates Swarm secrets cluster-wide (on dashboard node)
-    - wazuh-certs   # generates Wazuh TLS certs
-    - deploy-stack  # deploys/updates stack with rollback
+    - swarm-init
+    - networks
+    - traefik
+    - secrets
+
+# ---------------- Wazuh TLS Certificates ----------------
+- name: Populate Wazuh TLS certificates into Docker volume
+  hosts: node2:node3
+  become: true
+  vars:
+    wazuh_certs_source: "{{ playbook_dir }}/security/tls/wazuh/wazuh-certificates"
+    wazuh_certs_volume: wazuh-certs
+  roles:
+    - wazuh-certs
+
+# ---------------- Deploy Wazuh stack ----------------
+- name: Deploy/Update Wazuh Docker stack
+  hosts: node3
+  become: true
+  vars:
+    stack_file: "{{ playbook_dir }}/stack/wazuh-stack.yml"
+    stack_name: wazuh
+  roles:
+    - deploy-stack
