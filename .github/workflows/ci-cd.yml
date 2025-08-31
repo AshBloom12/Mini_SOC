@@ -7,11 +7,11 @@ on:
   # Triggers the workflow on push event but only for the "main" branch
   push:
     branches: ["main"]
-    paths:
-      - 'ansible/**'
-      - 'docker/**'
-      - '.github/workflows/ci-cd.yml'
-      - 'rules/**'   # also trigger when rules change
+  #  paths:
+  #    - 'ansible/**'
+  #    - 'docker/**'
+  #    - '.github/workflows/ci-cd.yml'
+  #    - 'rules/**'   # also trigger when rules change
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
