@@ -30,21 +30,19 @@
     dest: /home/ubuntu/certs/indexer/
     mode: push
     recursive: true
-    rsync_opts:
-      - "--rsh=ssh -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no"
   delegate_to: node1
   when: inventory_hostname != 'node1'
 
-- name: Sync Wazuh dashboard certs from node1 to other nodes
-  synchronize:
-    src: /home/ubuntu/certs/dashboard/
-    dest: /home/ubuntu/certs/dashboard/
-    mode: push
-    recursive: true
-    rsync_opts:
-      - "--rsh=ssh -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no"
-  delegate_to: node1
-  when: inventory_hostname != 'node1'
+# - name: Sync Wazuh dashboard certs from node1 to other nodes
+#  synchronize:
+#    src: /home/ubuntu/certs/dashboard/
+#    dest: /home/ubuntu/certs/dashboard/
+#    mode: push
+#    recursive: true
+#    rsync_opts:
+#      - "--rsh=ssh -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no"
+#  delegate_to: node1
+#  when: inventory_hostname != 'node1'
 
 
 # Populate Wazuh dashboard certs into Docker volume on each node
