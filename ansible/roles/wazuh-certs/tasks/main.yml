@@ -21,6 +21,24 @@
     state: absent
     force_kill: yes
 
+- name: Sync Wazuh indexer certs to all nodes
+  synchronize:
+    src: /home/ubuntu/certs/indexer/
+    dest: /home/ubuntu/certs/indexer/
+    mode: push
+    recursive: yes
+  delegate_to: node1
+  run_once: true
+
+- name: Sync Wazuh dashboard certs to all nodes
+  synchronize:
+    src: /home/ubuntu/certs/dashboard/
+    dest: /home/ubuntu/certs/dashboard/
+    mode: push
+    recursive: yes
+  delegate_to: node1
+  run_once: true
+
 - name: Populate Wazuh dashboard certs into Docker volume
   docker_container:
     name: wazuh-certs-populate-dashboard
