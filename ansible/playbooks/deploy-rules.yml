@@ -1,0 +1,22 @@
+- name: Deploy all custom Wazuh rules
+  hosts: node2
+  become: yes
+  vars:
+    wazuh_rules_src: "{{ playbook_dir }}/../../rules/"
+    wazuh_rules_dest: "/var/ossec/etc/rules/"
+
+  tasks:
+    - name: Copy all custom rules to Wazuh Manager
+      copy:
+        src: "{{ wazuh_rules_src }}"
+        dest: "{{ wazuh_rules_dest }}"
+        owner: root
+        group: ossec
+        mode: '0640'
+      notify: restart wazuh
+
+  handlers:
+    - name: restart wazuh
+      systemd:
+        name: wazuh-manager
+        state: restarted

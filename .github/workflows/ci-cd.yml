@@ -7,6 +7,11 @@ on:
   # Triggers the workflow on push event but only for the "main" branch
   push:
     branches: ["main"]
+    paths:
+      - 'ansible/**'
+      - 'docker/**'
+      - '.github/workflows/ci-cd.yml'
+      - 'rules/**'   # also trigger when rules change
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -201,6 +206,13 @@ jobs:
           echo "Swarm cleanup complete."
           EOF
 
+      - name: Generate Wazuh certs
+        run: |
+          cd security/tls/wazuh
+          curl -s https://packages.wazuh.com/4.12/wazuh-certs-tool.sh -o wazuh-cert-tool.sh
+          chmod +x wazuh-cert-tool.sh
+          ./wazuh-cert-tool.sh -A
+
       - name: Run Ansible deploy playbook
         run: |
           echo -n "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
@@ -257,3 +269,18 @@ jobs:
         run: |
           source .venv/bin/activate
           pytest tests/api -v
+
+  # ---------------- DEPLOY CUSTOM RULES ----------------
+  deploy_rules:
+    runs-on: self-hosted
+    needs: deploy   # run after infra is deployed
+    if: contains(github.event.head_commit.message, '[rules]') || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy custom rules with Ansible
+        run: |
+          echo -n "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
+          ansible-playbook ansible/playbooks/deploy_rules.yml --vault-password-file /tmp/vault_pass.txt
+          rm -f /tmp/vault_pass.txt

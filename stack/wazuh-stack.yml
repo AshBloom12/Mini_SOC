@@ -12,6 +12,9 @@ volumes:
   wazuh-manager-data:
     driver: local
   wazuh-dashboard-data:
+    driver: local
+  wazuh-certs:  # New volume for Wazuh TLS certs
+    driver: local
 
 services:
   # ---------------- Wazuh Indexer ----------------
@@ -21,13 +24,14 @@ services:
       - wazuh-net
     volumes:
       - wazuh-indexer-data:/var/lib/wazuh-indexer
+      - wazuh-certs:/etc/wazuh/certs:ro  # Mount certs as read-only
     deploy:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == node2
+          - node.hostname == node3  # Changed to worker VM
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health || exit 1"]
+      test: ["CMD", "curl", "-f", "https://localhost:9200/_cluster/health --cacert /etc/wazuh/certs/ca.pem || exit 1"]
       interval: 10s
       retries: 10
       start_period: 30s
@@ -38,17 +42,20 @@ services:
     environment:
       - ELASTICSEARCH_HOST=wazuh-indexer
       - ELASTICSEARCH_PORT=9200
+      - NODE_NAME=wazuh-manager
+      - WAZUH_CERTS_PATH=/etc/wazuh/certs
     networks:
       - wazuh-net
     volumes:
       - wazuh-manager-data:/var/ossec/data
+      - wazuh-certs:/etc/wazuh/certs:ro
     depends_on:
       - wazuh-indexer
     deploy:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == node2
+          - node.hostname == node3
 
   # ---------------- Wazuh Dashboard ----------------
   wazuh-dashboard:
@@ -58,6 +65,7 @@ services:
       - ELASTICSEARCH_PORT=9200
       - WAZUH_MANAGER_HOST=wazuh-manager
       - WAZUH_MANAGER_PORT=55000
+      - WAZUH_CERTS_PATH=/etc/wazuh/certs
     networks:
       - wazuh-net
       - traefik-public
@@ -66,6 +74,7 @@ services:
       - wazuh-manager
     volumes:
       - wazuh-dashboard-data:/usr/share/wazuh-dashboard/data
+      - wazuh-certs:/etc/wazuh/certs:ro
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wazuh-dashboard.rule=Host(`16.16.96.148`)"
@@ -77,4 +86,4 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == node1
+          - node.hostname == node2  # Dashboard VM (manager node)

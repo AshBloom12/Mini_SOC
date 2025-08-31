@@ -82,22 +82,33 @@ ansible/
 │   ├─ group\_vars/all/all.yml
 │   ├─ group\_vars/all/vault.yml
 │   └─ hosts.yml
-├─ playbooks/deploy.yml
-├─ playbooks/teardown.yml
+├─ playbooks/
+│   ├─ deploy_rules.yml               # Playbook to deploy custom rules
+│   ├─ deploy.yml
+│   └─ teardown.yml
 └─ roles/
-├─ swarm-init/
-├─ networks/
-├─ secrets/
-├─ deploy-stack/
-└─ traefik/
+    ├─ deploy-stack/
+    │   ├─ tasks/main.yml
+    │   └─ templates/docker-compose.yml.j2
+    ├─ networks/tasks/main.yml
+    ├─ secrets/tasks/main.yml
+    ├─ swarm-init/tasks/main.yml
+    ├─ traefik/
+    │   ├─ defaults/main.yml
+    │   └─ tasks/main.yml   
+    └─ wazuh-certs/tasks/main.yml
 docker/                               # Custom Wazuh images
 ├─ dashboard/
 ├─ indexer/
-└─ manager/                    
+└─ manager/
+rules/ssh_bruteforce_rule.xml         # Custom SSH brute force rule, we can add new rules under this folder          
 stack/wazuh-stack.yml                 # Wazuh stack for Swarm
-security/tls/traefik/traefik.yml      # Traefik static config
-security/tls/traefik/dynamic.yml      # Traefik dynamic TLS config
-security/tls/policy.md                # Security policy
+security/tls
+├─ traefik/
+│   ├─ traefik.yml                    # Traefik static config
+│   └─ dynamic.yml                    # Traefik dynamic TLS config
+├─ wazuh/config.yml                   # Configuration file for cert generator script
+└─ policy.md                          # Security policy
 tests/
 ├─ selenium/test\_dashboard.py        # Selenium dashboard tests
 ├─ selenium/requirements.txt

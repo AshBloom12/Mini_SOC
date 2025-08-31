@@ -104,6 +104,7 @@
   roles:
     - swarm-init    # initializes Swarm and sets join tokens
     - networks      # creates overlay networks
-    - secrets       # creates Swarm secrets cluster-wide (on dashboard node)
     - traefik       # deploys Traefik reverse proxy with TLS/ACME
+    - secrets       # creates Swarm secrets cluster-wide (on dashboard node)
+    - wazuh-certs   # generates Wazuh TLS certs
     - deploy-stack  # deploys/updates stack with rollback
