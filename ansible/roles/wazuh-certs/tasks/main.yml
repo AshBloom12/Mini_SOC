@@ -9,11 +9,13 @@
     - /home/ubuntu/certs/indexer
     - /home/ubuntu/certs/dashboard
 
-- name: Ensure temporary cert-populate-dashboard container is removed
-  docker_container:
-    name: wazuh-certs-populate-dashboard
-    state: absent
-    force_kill: yes
+- name: Remove any stale Wazuh cert-populate containers
+  ansible.builtin.shell: |
+    docker rm -f wazuh-certs-populate-dashboard 2>/dev/null || true
+    docker rm -f wazuh-certs-populate-indexer 2>/dev/null || true
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['all'] }}"
+  ignore_errors: yes
 
 - name: Populate Wazuh dashboard certs into Docker volume
   docker_container:
@@ -28,12 +30,6 @@
     auto_remove: yes
   delegate_to: "{{ item }}"
   loop: "{{ groups['all'] }}"   # Runs on all nodes
-
-- name: Ensure temporary cert-populate-indexer container is removed
-  docker_container:
-    name: wazuh-certs-populate-indexer
-    state: absent
-    force_kill: yes
 
 - name: Populate Wazuh indexer certs into Docker volume
   docker_container:
