@@ -35,6 +35,7 @@
   delegate_to: "{{ item }}"
   loop: "{{ groups['all'] | difference(['node1']) }}"
   run_once: true
+  become: no
 
 - name: Sync Wazuh dashboard certs to all other nodes
   synchronize:
