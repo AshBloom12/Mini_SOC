@@ -1,86 +1,74 @@
-- name: Ensure cert directories exist on all nodes
+---
+- name: Ensure cert directories exist on host
   file:
     path: "{{ item }}"
     state: directory
-    owner: 1000
-    group: 1000
+    owner: ubuntu
+    group: ubuntu
     mode: '0755'
   loop:
     - /home/ubuntu/certs/indexer
     - /home/ubuntu/certs/dashboard
 
-- name: Remove existing Wazuh dashboard cert-populate container
+# ---------------- Remove old populate containers ----------------
+- name: Remove existing dashboard cert-populate container
   docker_container:
     name: wazuh-certs-populate-dashboard
     state: absent
     force_kill: true
   ignore_errors: true
 
-- name: Remove existing Wazuh indexer cert-populate container
+- name: Remove existing indexer cert-populate container
   docker_container:
     name: wazuh-certs-populate-indexer
     state: absent
     force_kill: true
   ignore_errors: true
 
-# ---------------- Sync certs from Node1 to all other nodes ----------------
+# ---------------- Sync indexer certs from node1 ----------------
 - name: Sync Wazuh indexer certs from node1 to other nodes
   synchronize:
     src: /home/ubuntu/certs/indexer/
     dest: /home/ubuntu/certs/indexer/
-    mode: push
     recursive: true
   delegate_to: node1
   when: inventory_hostname != 'node1'
 
-# - name: Sync Wazuh dashboard certs from node1 to other nodes
-#  synchronize:
-#    src: /home/ubuntu/certs/dashboard/
-#    dest: /home/ubuntu/certs/dashboard/
-#    mode: push
-#    recursive: true
-#    rsync_opts:
-#      - "--rsh=ssh -i /home/ubuntu/.ssh/mini-soc.pem -o StrictHostKeyChecking=no"
-#  delegate_to: node1
-#  when: inventory_hostname != 'node1'
+# ---------------- Populate certs into Docker volumes ----------------
+- name: Populate Wazuh certs into Docker volumes
+  block:
+    - name: Populate dashboard certs into Docker volume
+      docker_container:
+        name: wazuh-certs-populate-dashboard
+        image: alpine:latest
+        state: started
+        command: >
+          sh -c "cp -r /source/* /certs/ && chmod -R 644 /certs/* && chown -R 1000:1000 /certs/"
+        volumes:
+          - "wazuh-certs-dashboard:/certs"
+          - "/home/ubuntu/certs/dashboard:/source:ro"
+        auto_remove: true
 
-
-# Populate Wazuh dashboard certs into Docker volume on each node
-- name: Populate Wazuh dashboard certs into Docker volume
-  docker_container:
-    name: wazuh-certs-populate-dashboard
-    image: alpine:latest
-    state: started
-    command: >
-      sh -c "cp -r /source/* /certs/ && chmod -R 644 /certs/* && chown -R 1000:1000 /certs/"
-    volumes:
-      - "wazuh-certs-dashboard:/certs"
-      - "/home/ubuntu/certs/dashboard:/source:ro"
-    auto_remove: true
+    - name: Populate indexer certs into Docker volume
+      docker_container:
+        name: wazuh-certs-populate-indexer
+        image: alpine:latest
+        state: started
+        command: >
+          sh -c "cp -r /source/* /certs/ && chmod -R 644 /certs/* && chown -R 1000:1000 /certs/"
+        volumes:
+          - "wazuh-certs-indexer:/certs"
+          - "/home/ubuntu/certs/indexer:/source:ro"
+        auto_remove: true
   run_once: false
 
-# Populate Wazuh indexer certs into Docker volume on each node
-- name: Populate Wazuh indexer certs into Docker volume
-  docker_container:
-    name: wazuh-certs-populate-indexer
-    image: alpine:latest
-    state: started
-    command: >
-      sh -c "cp -r /source/* /certs/ && chmod -R 644 /certs/* && chown -R 1000:1000 /certs/"
-    volumes:
-      - "wazuh-certs-indexer:/certs"
-      - "/home/ubuntu/certs/indexer:/source:ro"
-    auto_remove: true
-  run_once: false
-
-
-# ---------------- Fix ownership and permissions ----------------
+# ---------------- Fix host cert permissions ----------------
 - name: Ensure correct permissions for dashboard certs
   file:
     path: /home/ubuntu/certs/dashboard
     state: directory
-    owner: 1000
-    group: 1000
+    owner: ubuntu
+    group: ubuntu
     mode: '0755'
     recurse: true
 
@@ -91,8 +79,8 @@
   file:
     path: /home/ubuntu/certs/indexer
     state: directory
-    owner: 1000
-    group: 1000
+    owner: ubuntu
+    group: ubuntu
     mode: '0755'
     recurse: true
 
