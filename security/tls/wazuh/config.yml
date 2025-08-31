@@ -1,11 +1,12 @@
 nodes:
   indexer:
     - name: wazuh-indexer
-      ip: 10.0.2.51   # internal IP of VM3
+      ip: 10.0.2.51
+
   server:
     - name: wazuh-manager
-      ip: 10.0.2.51
-      node_type: master
+      ip: 10.0.2.51    # single manager, no node_type needed
+
   dashboard:
     - name: wazuh-dashboard
-      ip: 10.0.1.191   # internal IP of VM2 (dashboard host)
+      ip: 10.0.1.191
