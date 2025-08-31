@@ -42,8 +42,9 @@
         name: wazuh-certs-populate-dashboard
         image: alpine:latest
         state: started
+        user: "1000:1000"
         command: >
-          sh -c "cp -r /source/* /certs/ && chmod -R 644 /certs/* && chown -R 1000:1000 /certs/"
+          sh -c "cp -r /source/* /certs/ && chmod -R 644 /certs/*"
         volumes:
           - "wazuh-certs-dashboard:/certs"
           - "/home/ubuntu/certs/dashboard:/source:ro"
@@ -54,8 +55,9 @@
         name: wazuh-certs-populate-indexer
         image: alpine:latest
         state: started
+        user: "1000:1000"
         command: >
-          sh -c "cp -r /source/* /certs/ && chmod -R 644 /certs/* && chown -R 1000:1000 /certs/"
+          sh -c "cp -r /source/* /certs/ && chmod -R 644 /certs/*"
         volumes:
           - "wazuh-certs-indexer:/certs"
           - "/home/ubuntu/certs/indexer:/source:ro"
