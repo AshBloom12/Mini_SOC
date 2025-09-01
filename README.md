@@ -282,15 +282,6 @@ docker stack deploy -c stack/wazuh-stack.yml <stack_name>
 
 ---
 
-## 📸 Evidence to Collect
-
-* ✅ Screenshots of pipeline runs
-* ✅ Wazuh dashboard (mask creds)
-* ✅ Trivy report sample
-* ✅ Ansible deploy output
-
----
-
 ## 📌 Assumptions
 
 * DNS/IPs are reachable from your runner
