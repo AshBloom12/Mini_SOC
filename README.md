@@ -9,7 +9,7 @@ This repo shows how to build, scan, test, and deploy Wazuh securely using **GitH
 
 - 🐳 **Wazuh Stack** – Manager, Indexer, and Dashboard  
 - 🔒 **HTTPS** with Traefik (using a self-signed cert)  
-- 📦 **CI/CD pipeline** – Build → Trivy Scan → Selenium & API tests → Deploy with Ansible  
+- 📦 **CI/CD pipeline** – Build → Trivy Scan → Deploy with Ansible → Selenium & API tests → Deploy Custom rules
 - 🗂️ **Persistent storage** with Docker volumes  
 - 🔑 **Secrets management** with GitHub Secrets, Ansible Vault, and Swarm Secrets  
 - 🛠️ **Rollback support** with Docker Swarm  
@@ -56,6 +56,7 @@ flowchart LR
 4. Traefik exposes the Wazuh dashboard securely over HTTPS.  
 5. Selenium tests validate dashboard accessibility and login form.  
 6. API tests validate Wazuh Manager health.  
+7. Deploy Wazuh new customized rules onto our SIEM using Ansilbe
 
 ---
 
@@ -66,7 +67,8 @@ flowchart LR
 2. **Build** → Build container images  
 3. **Scan** → Scan with **Trivy**, fail on High/Critical vulnerabilities  
 4. **Deploy** → Deploy stack to Swarm with **Ansible**  
-5. **Tests** → Run Selenium (HTTPS validation) + API probes  
+5. **Tests** → Run Selenium (HTTPS validation) + API probes
+6. **Deploy Rules** → Deploy Wazuh custom rules using Ansilbe
 
 > Tests are executed **after deployment** since HTTPS validation requires running services.
 

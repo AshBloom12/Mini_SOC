@@ -49,12 +49,7 @@ jobs:
       # Build and Push Wazuh Indexer
       # - name: Build custom Wazuh Indexer
       #  run: |
-      #    docker build \
-      #      --build-arg WAZUH_VERSION=4.12.0 \
-      #      --build-arg WAZUH_TAG_REVISION=1 \
-      #      -t ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0 \
-      #      -f docker/indexer/Dockerfile \
-      #      docker/indexer/
+      #    docker build -t ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0 -f docker/indexer/Dockerfile docker/indexer/
 
       # - name: Push Wazuh Indexer image
       #  run: docker push ghcr.io/ashbloom12/min-soc/wazuh-indexer:4.12.0
@@ -62,14 +57,7 @@ jobs:
       # Build and Push Wazuh Manager
       # - name: Build custom Wazuh Manager
       #  run: |
-      #    docker build \
-      #      --build-arg WAZUH_VERSION=4.12.0 \
-      #      --build-arg WAZUH_TAG_REVISION=1 \
-      #      --build-arg FILEBEAT_TEMPLATE_BRANCH=main \
-      #      --build-arg WAZUH_FILEBEAT_MODULE=wazuh \
-      #      -t ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0 \
-      #      -f docker/manager/Dockerfile \
-      #      docker/manager/
+      #    docker build -t ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0 -f docker/manager/Dockerfile docker/manager/
 
       # - name: Push Wazuh Manager image
       #   run: docker push ghcr.io/ashbloom12/min-soc/wazuh-manager:4.12.0
@@ -77,13 +65,7 @@ jobs:
       # Build and Push Wazuh Dashboard
       # - name: Build custom Wazuh Dashboard
       #   run: |
-      #     docker build \
-      #       --build-arg WAZUH_VERSION=4.12.0 \
-      #       --build-arg WAZUH_TAG_REVISION=1 \
-      #       --build-arg WAZUH_UI_REVISION=4.12.0 \
-      #       -t ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0 \
-      #       -f docker/dashboard/Dockerfile \
-      #      docker/dashboard/
+      #     docker build -t ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0 -f docker/dashboard/Dockerfile docker/dashboard/
 
       # - name: Push Wazuh Dashboard image
       #   run: docker push ghcr.io/ashbloom12/min-soc/wazuh-dashboard:4.12.0
